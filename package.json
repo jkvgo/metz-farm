@@ -59,13 +59,16 @@
     "style-loader": "^0.20.3",
     "url-loader": "^0.6.2",
     "webpack": "^4.29.4",
-    "webpack-cli": "^2.1.5",
+    "webpack-cli": "^3.1.1",
     "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
+    "bootstrap": "^4.3.1",
+    "jquery": "^3.3.1",
     "prop-types": "^15.7.2",
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
+    "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1"
   }
 }
