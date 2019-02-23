@@ -1,8 +1,12 @@
 import React, {Component} from 'react';
+import {Route, Link, withRouter} from 'react-router-dom';
 
 class Customer extends Component{
-    constructor(){
-        super();
+    constructor(props){
+        super(props);
+        this.state = {
+            path: props.match.path
+        };
         this.customers = [
             {
                 id: 0,
@@ -26,8 +30,21 @@ class Customer extends Component{
     }
     
     render(){
+        const currentPath = this.state.path ? this.state.path : "";
+        let customers = this.customers.map((cust, key) => {
+            return (
+                <div className="row" key={key}>
+                    <b>{key+1}</b>
+                    <b className="customer-name">{cust.name}</b>
+                    <Link to={`${currentPath}/price/${cust.id}`}>View Prices</Link>
+                    <Link to={`${currentPath}/history/${cust.id}`}>View History</Link>
+                </div>
+            );
+        });
         return(
-            <div></div>
+            <div id="customer-container" className="column center-container">
+                {customers}
+            </div>
         );
     }
 }

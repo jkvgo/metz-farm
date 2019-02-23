@@ -42,14 +42,25 @@ class Receipt extends Component{
     }
     
     addOrder(e){
+        const chosenCustomer = this.state.customer;
+        let customerDetails = this.customers.find((cust) => {
+            return cust.name === chosenCustomer
+        });
+
         let orders = this.state.orders;
+
         let item = this.refs.itemValue.value;
         let quantity = this.refs.itemQuantity.value;
         let unit = this.refs.itemUnit.value;
+        let price = customerDetails.price[item][unit.toLowerCase()];
+        let totalPrice = price * quantity;
+
         orders.push({
             item: item,
             quantity: quantity,
-            unit: unit
+            unit: unit,
+            price: price,
+            totalPrice: totalPrice
         });
         this.setState({
             orders: orders,
@@ -70,6 +81,8 @@ class Receipt extends Component{
                     <td>{ord.item}</td>
                     <td>{ord.quantity}</td>
                     <td>{ord.unit}</td>
+                    <td>{ord.price}</td>
+                    <td>{ord.totalPrice}</td>
                 </tr>
             )
         }) : [];
@@ -118,12 +131,17 @@ class Receipt extends Component{
                                 <th>Item</th>
                                 <th>Quantity</th>
                                 <th>Unit</th>
+                                <th>Price per Unit</th>
+                                <th>Total Price</th>
                             </tr>
                         </thead>
                         <tbody>
                             {orders}
                         </tbody>
                     </table>
+                    <div className="row just-end">
+                        <button type="button">Submit Order</button>
+                    </div>
                 </div>
             </div>
                 

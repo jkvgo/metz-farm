@@ -112,3 +112,34 @@ body{
         opacity: 1;
     }
 }
+
+#price-container{
+    .value-display{
+        b{
+            display: block;
+        }
+        input{
+            display: none;
+        }
+        .display-value{
+            display: block;
+        }
+        .update-value{
+            display: none;
+        }
+    }
+    .value-edit{
+        b{
+            display: none;
+        }
+        input{
+            display: block;
+        }
+        .display-value{
+            display: none;
+        }
+        .update-value{
+            display: block;
+        }
+    }
+}
