@@ -33,8 +33,8 @@ class Customer extends Component{
         const currentPath = this.state.path ? this.state.path : "";
         let customers = this.customers.map((cust, key) => {
             return (
-                <div className="row" key={key}>
-                    <b>{key+1}</b>
+                <div className="row customer-item just-between align-center" key={key}>
+                    <p>{key+1}</p>
                     <b className="customer-name">{cust.name}</b>
                     <Link to={`${currentPath}/price/${cust.id}`}>View Prices</Link>
                     <Link to={`${currentPath}/history/${cust.id}`}>View History</Link>
@@ -42,7 +42,7 @@ class Customer extends Component{
             );
         });
         return(
-            <div id="customer-container" className="column center-container">
+            <div id="customer" className="column center-container">
                 {customers}
             </div>
         );

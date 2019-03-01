@@ -30,6 +30,15 @@ class Receipt extends Component{
                     juice: { case: 15 },
                     plasticEgg: { kilo: 10 }
                 }
+            },
+            {
+                id: 3,
+                name: "SBJ Tracking",
+                price: {
+                    goodCrackBig: { case: 50 },
+                    juice: { case: 15 },
+                    plasticEgg: { kilo: 10 }
+                }
             }
         ];
         this.order= [];
@@ -92,10 +101,10 @@ class Receipt extends Component{
             );
         });
         return(
-            <div id="receipt-container" className="row center-container">
+            <div id="receipt" className="row center-container">
                 <div className="column">
                     <h2>Create Order</h2>
-                    <div className="row">
+                    <div className="row align-center customer-container">
                         <h3>Customer: </h3>
                         <select ref="chosenCustomer" onChange={() => this.chooseCustomer()} >
                             {customerNames}
@@ -103,22 +112,28 @@ class Receipt extends Component{
                     </div>
                     <h3>Order Details:</h3>
                     <div className="column">
-                        <div className="row-no first-item">
-                            <b>Item: </b>
-                            <select ref="itemValue">
-                                <option value="">----</option>
-                                <option>XL</option>
-                                <option>D</option>
-                                <option>M</option>
-                            </select>
-                            <b>Quantity: </b>
-                            <input type="number" ref="itemQuantity" placeholder="0"/>
-                            <b>Unit: </b>
-                            <select ref="itemUnit">
-                                <option>Case</option>
-                                <option>Tray</option>
-                            </select>
-                            <button type="button" onClick={(e) => this.addOrder()}>Add Order</button>
+                        <div className="column-no first-item">
+                            <div className="form-item">
+                                Item:
+                                <select ref="itemValue">
+                                    <option value="">----</option>
+                                    <option>XL</option>
+                                    <option>D</option>
+                                    <option>M</option>
+                                </select>
+                            </div>
+                            <div className="form-item">
+                                Quantity:
+                                <input type="number" ref="itemQuantity" placeholder="0"/>
+                            </div>
+                            <div className="form-item">
+                                Unit:
+                                <select ref="itemUnit">
+                                    <option>Case</option>
+                                    <option>Tray</option>
+                                </select>
+                            </div>
+                            <button className="add-button" type="button" onClick={(e) => this.addOrder()}>Add Order</button>
                         </div>
                     </div>
                 </div>
@@ -139,7 +154,7 @@ class Receipt extends Component{
                             {orders}
                         </tbody>
                     </table>
-                    <div className="row just-end">
+                    <div className="row just-end order-button">
                         <button type="button">Submit Order</button>
                     </div>
                 </div>

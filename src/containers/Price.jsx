@@ -116,8 +116,8 @@ class Price extends Component{
 			);
 		}) : [];
 		return(
-			<div id="price-container" className="center-container">
-				<h2>{customer.name}</h2>
+			<div id="price" className="center-container">
+				<h3>{customer.name}</h3>
 				<table>
 					<thead>
 						<tr>

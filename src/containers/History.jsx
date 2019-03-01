@@ -91,25 +91,25 @@ class History extends Component{
 		}) : [];
 		const tableItems = this.itemUnits.length ? this.itemUnits.map((val, key) => {
 			return(
-				<td colSpan={val.units.length} key={key}>
+				<th colSpan={val.units.length} key={key}>
 					{val.item}
-				</td>
+				</th>
 			)	
 		}) : [];
 		const tableUnits = this.itemUnits.length ? this.itemUnits.map((val, key) => {
 			return(
 				val.units.map((val2) => {
 					return(
-						<td key={val.item+val2}>
+						<th key={val.item+val2} className="column-subhead">
 							{val2}
-						</td>
+						</th>
 					)
 				})
 			)
 		}) : [];
 
 		return(
-			<div id="history-container" className="center-container">
+			<div id="history" className="center-container">
 				<h2>{customerName}</h2>
 				<table>
 					<thead>
