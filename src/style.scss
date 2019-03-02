@@ -372,3 +372,31 @@ table{
         }
     }
 }
+
+#report{
+    .date-range{
+        display: inline-block;
+        input{
+            margin-left: 20px;
+            font-size: 16px;
+        }
+    }
+    .date-range:nth-child(3){
+        margin-left: 30px;
+    }
+    button{
+        float: unset;
+        padding: 3px 10px;
+        border-radius: 10px;
+        margin-left: 20px;
+    }
+    table{
+        thead{
+            th{
+                text-align: left;
+            }
+        }
+        margin-top: 30px;
+        width: 100%;
+    }
+}

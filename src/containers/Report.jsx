@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import DatePicker from 'react-datepicker';
+import jsPDF from 'jspdf';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -57,6 +58,9 @@ class Report extends Component{
     	this.setState({
     		receipts: this.receipts
     	});
+        var doc = new jsPDF();
+        doc.text("Hello World", 10, 10);
+        doc.save('a4.pdf');
     }
     
     render(){
@@ -94,13 +98,13 @@ class Report extends Component{
     	}) : [];
 
         return(
-            <div id="reports-container" className="center-container">
-            	<h2>Weekly Report</h2>
-            	<div>
+            <div id="report" className="center-container">
+            	<h2>Report</h2>
+            	<div className="date-range">
             		From:
             		<DatePicker selected={startDate} onChange={this.setStartDate}/>
             	</div>
-            	<div>
+            	<div className="date-range">
             		To:
             		<DatePicker selected={endDate} onChange={this.setEndDate}/>
             	</div>
@@ -109,7 +113,7 @@ class Report extends Component{
             		<thead>
             			<tr>
             				<th></th>
-            				<th></th>
+            				<th>Customer</th>
             				<th>Item</th>
             				<th>Qty</th>
             				<th>Unit</th>
