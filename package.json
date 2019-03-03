@@ -63,7 +63,10 @@
     "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
+    "body-parser": "^1.18.3",
     "bootstrap": "^4.3.1",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
     "jquery": "^3.3.1",
     "jspdf": "^1.5.3",
     "prop-types": "^15.7.2",
@@ -72,6 +75,7 @@
     "react-datepicker": "^2.1.0",
     "react-dom": "^16.8.2",
     "react-router": "^4.3.1",
-    "react-router-dom": "^4.3.1"
+    "react-router-dom": "^4.3.1",
+    "sqlite3": "^4.0.6"
   }
 }
