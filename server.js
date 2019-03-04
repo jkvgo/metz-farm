@@ -36,7 +36,6 @@ app.get("/*", (req,res) => {
 app.post("/verify", (req,res) => {
 	let verified = false;
 	let credentials = req.body;
-	let objectz = [credentials.username, credentials.password];
 	let sql = `SELECT * FROM users WHERE name = ? AND password = ?`;
 	db.serialize(() => {
 		db.each(sql, [credentials.username, credentials.password], (err, row) => {
@@ -44,11 +43,9 @@ app.post("/verify", (req,res) => {
 			  console.error(err.message);
 			}
 			verified = true;
-			
-			
 		}, () => {
 			if(verified){
-				res.status(200).json({"good":"good"});		
+				res.status(200).send();
 			}else{
 				res.status(500).send();
 			}

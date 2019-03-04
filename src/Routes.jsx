@@ -7,16 +7,19 @@ import Price from './containers/Price';
 import History from './containers/History';
 import Login from './containers/Login';
 
+import UserSession from './UserSession';
+
 function logout(){
-    alert("LOG OUT USER!");
+    UserSession.setLoggedOut();
+    window.location.replace("/login");
 }
 
-function redirectToLogin(){
-    console.log("redirecting");
-    return <Redirect to="/login"/>
-}
-
-
+// function redirectToLogin(){
+//     const session = UserSession.getStatus();
+//     if(!session){
+//         return <Redirect to="/login"/>    
+//     }
+// }
 
 const Routes = () => (
     <Router>

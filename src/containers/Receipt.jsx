@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
+import UserSession from '../UserSession';
 
 class Receipt extends Component{
     constructor(){
@@ -79,7 +81,7 @@ class Receipt extends Component{
         this.refs.itemQuantity.value = "";
         this.refs.itemUnit.value = "";
     }
-    
+
     render(){
         const chosenCustomer = this.state.customer;
         const showSummary = this.state.showSummary;
@@ -102,6 +104,7 @@ class Receipt extends Component{
         });
         return(
             <div id="receipt" className="row center-container">
+                {UserSession.redirectToLogin()}
                 <div className="column">
                     <h2>Create Order</h2>
                     <div className="row align-center customer-container">

@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import { BrowserRouter as Router, Route, Link, Switch, Redirect } from 'react-router-dom';
+import UserSession from '../UserSession';
 import axios from 'axios';
 
 class Login extends Component{
@@ -29,9 +30,9 @@ class Login extends Component{
 	verifyUser(){
 		const creds = this.state;
 		axios.post('/verify', creds).then((res) => {
-			console.log(res);
+			UserSession.setLoggedIn();
 		}).catch((err) => {
-			console.error(err);
+			console.error("Unable to Login");
 		});
 	}
 
@@ -41,19 +42,19 @@ class Login extends Component{
 		const password = this.state.password.length ? this.state.password : "";
 		return(
 			<div id="login" className="row just-end align-center">
-				<div className="login-container column-no just-between">
+				<div className="login-container column-no">
 					<h2>Login</h2>
-					<form>
+					<form className="column-no">
 						<div>
 							<b>User:</b>
 							<input type="text" value={username} onChange={this.changeUsername}/>
 						</div>
 						<div>
 							<b>Password:</b>
-							<input type="text" value={password} onChange={this.changePassword}/>
+							<input type="password" value={password} onChange={this.changePassword}/>
 						</div>
+						<button className="login-button" type="submit" onClick={this.verifyUser}>Login</button>	
 					</form>
-					<button className="login-button" type="button" onClick={this.verifyUser}>Login</button>
 				</div>
 			</div>
 		);
