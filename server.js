@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3").verbose();
 var path = require("path");
 
-const port = 3000;
+const port = 3001;
 const app = express();
 app.use(bodyParser.json());
 app.use(express.static('build'));
@@ -25,11 +25,47 @@ let db = new sqlite3.Database("./db/farm.db", sqlite3.OPEN_READWRITE, (err) => {
 // 	console.log('Close the database connection.');
 // });
 
-app.get("/*", (req,res) => {
+app.get("/", (req,res) => {
 	res.sendFile(path.join(__dirname, 'build/index.html'), (err) => {
 		if(err){
 			res.status(500).send(err);
 		}
+	})
+});
+
+app.get("/customers", (req,res) => {
+	let sql = `select c.id, c.name, i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id order by c.id`;
+	let customers = [], mappedCustomers;
+	db.serialize(() => {
+		db.each(sql, (err, row) => {
+			customers.push(row);
+		}, (err) => {
+			let currCustomer;
+			mappedCustomers = customers.reduce((allCust, cust) => {
+				if(currCustomer !== cust.id){
+					allCust.push({
+						id: cust.id,
+						name: cust.name,
+						price: {
+							[cust.item]: {
+								[cust.unit]: cust.price
+							}
+						}
+					});
+					currCustomer = cust.id;
+				}else{
+					if(allCust.find(c => c.id === cust.id).price.hasOwnProperty(cust.item)){
+						allCust.find(c => c.id === cust.id).price[cust.item][cust.unit] = cust.price;
+					}else{
+						allCust.find(c => c.id === cust.id).price[cust.item] = {
+							[cust.unit]: cust.price
+						};
+					}
+				}
+				return allCust;
+			}, []);
+			res.status(err ? 500:200).json(err || mappedCustomers);
+		});
 	})
 });
 
@@ -53,6 +89,8 @@ app.post("/verify", (req,res) => {
 
 	});
 });
+
+
 
 app.listen(port, '0.0.0.0', function(){
 	console.log("Listening on: " + port);

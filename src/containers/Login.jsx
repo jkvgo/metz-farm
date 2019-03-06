@@ -27,9 +27,10 @@ class Login extends Component{
 		});
 	}
 
-	verifyUser(){
+	verifyUser(e){
+		e.preventDefault();
 		const creds = this.state;
-		axios.post('/verify', creds).then((res) => {
+		axios.post('http://localhost:3001/verify', creds).then((res) => {
 			UserSession.setLoggedIn();
 		}).catch((err) => {
 			console.error("Unable to Login");
@@ -44,7 +45,7 @@ class Login extends Component{
 			<div id="login" className="row just-end align-center">
 				<div className="login-container column-no">
 					<h2>Login</h2>
-					<form className="column-no">
+					<form className="column-no" onSubmit={this.verifyUser} >
 						<div>
 							<b>User:</b>
 							<input type="text" value={username} onChange={this.changeUsername}/>

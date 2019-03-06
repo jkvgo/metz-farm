@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Route, Link, withRouter} from 'react-router-dom';
+import axios from 'axios';
 
 class Customer extends Component{
     constructor(props){
@@ -27,6 +28,15 @@ class Customer extends Component{
                 }
             }
         ];
+        this.customers = [];
+        this.getCustomers = this.getCustomers.bind(this);
+        this.getCustomers();
+    }
+
+    getCustomers(){
+        axios.get('http://localhost:3001/customers').then((res) => {
+            console.log(res);
+        });
     }
     
     render(){

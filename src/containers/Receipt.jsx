@@ -1,12 +1,15 @@
 import React, {Component} from 'react';
 import {Redirect} from 'react-router-dom';
 import UserSession from '../UserSession';
+import axios from 'axios';
 
 class Receipt extends Component{
     constructor(){
         super();
         this.state = {
-            customer: "asd",
+            allCustomers: [],
+            customer: "",
+            item: "",
             orders: [],
             showSummary: "hide"
         };
@@ -43,18 +46,41 @@ class Receipt extends Component{
                 }
             }
         ];
-        this.order= [];
+        this.order = [];
+        this.getCustomers = this.getCustomers.bind(this);
+        this.chooseCustomer = this.chooseCustomer.bind(this);
+        this.chooseItem = this.chooseItem.bind(this);
+        this.getCustomers();
+    }
+
+    getCustomers(){
+        // let customers = [];
+        axios.get('http://localhost:3001/customers').then((res) => {
+            this.setState({
+                allCustomers: res.data,
+                customer: res.data[0].name
+            });
+        });
     }
     
     chooseCustomer(){
         this.setState({
-            customer: this.refs.chosenCustomer.value
+            customer: this.refs.chosenCustomer.value,
+            item: ""
+        });
+        this.refs.itemQuantity.value = "";
+    }
+
+    chooseItem(){
+        this.setState({
+            item: this.refs.itemValue.value
         });
     }
     
     addOrder(e){
+        const allCustomers = this.state.allCustomers ? this.state.allCustomers : [];
         const chosenCustomer = this.state.customer;
-        let customerDetails = this.customers.find((cust) => {
+        let customerDetails = this.allCustomers.find((cust) => {
             return cust.name === chosenCustomer
         });
 
@@ -83,8 +109,22 @@ class Receipt extends Component{
     }
 
     render(){
+        const allCustomers = this.state.allCustomers.length ? this.state.allCustomers : [];
         const chosenCustomer = this.state.customer;
+        const chosenItem = this.state.item;
         const showSummary = this.state.showSummary;
+        const items = allCustomers.find(cust => cust.name === chosenCustomer) ? 
+        Object.keys(allCustomers.find(cust => cust.name === chosenCustomer).price).map((k) => {
+            return (
+                <option key={k}>{k}</option>
+            );
+        }) : [];
+        const unitsArray = allCustomers.find(cust => cust.name === chosenCustomer) && chosenItem ? Object.keys(allCustomers.find(cust => cust.name === chosenCustomer).price[chosenItem]) : [];
+        const units = unitsArray.length ? unitsArray.map((u) => {
+            return (
+                <option key={u}>{u}</option>
+            );
+        }) : [];
         const orders = this.state.orders ? this.state.orders.map((ord, key) => {
             return (
                 <tr key={key}>
@@ -97,7 +137,7 @@ class Receipt extends Component{
                 </tr>
             )
         }) : [];
-        const customerNames = this.customers.map((cust, key) => {
+        const customerNames = allCustomers.map((cust, key) => {
             return (
                 <option key={key}>{cust.name}</option>
             );
@@ -118,11 +158,9 @@ class Receipt extends Component{
                         <div className="column-no first-item">
                             <div className="form-item">
                                 Item:
-                                <select ref="itemValue">
+                                <select ref="itemValue" onChange={() => this.chooseItem()}>
                                     <option value="">----</option>
-                                    <option>XL</option>
-                                    <option>D</option>
-                                    <option>M</option>
+                                    {items}
                                 </select>
                             </div>
                             <div className="form-item">
@@ -132,8 +170,7 @@ class Receipt extends Component{
                             <div className="form-item">
                                 Unit:
                                 <select ref="itemUnit">
-                                    <option>Case</option>
-                                    <option>Tray</option>
+                                    {units}
                                 </select>
                             </div>
                             <button className="add-button" type="button" onClick={(e) => this.addOrder()}>Add Order</button>
