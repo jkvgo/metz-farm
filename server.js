@@ -34,7 +34,7 @@ app.get("/", (req,res) => {
 });
 
 app.get("/customers", (req,res) => {
-	let sql = `select c.id, c.name, i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id order by c.id`;
+	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id order by c.id`;
 	let customers = [], mappedCustomers;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
@@ -48,17 +48,17 @@ app.get("/customers", (req,res) => {
 						name: cust.name,
 						price: {
 							[cust.item]: {
-								[cust.unit]: cust.price
+								[cust.unit]: { price: cust.price, id: cust.itemID }
 							}
 						}
 					});
 					currCustomer = cust.id;
 				}else{
 					if(allCust.find(c => c.id === cust.id).price.hasOwnProperty(cust.item)){
-						allCust.find(c => c.id === cust.id).price[cust.item][cust.unit] = cust.price;
+						allCust.find(c => c.id === cust.id).price[cust.item][cust.unit] = { price: cust.price, id: cust.itemID };
 					}else{
 						allCust.find(c => c.id === cust.id).price[cust.item] = {
-							[cust.unit]: cust.price
+							[cust.unit]: { price: cust.price, id: cust.itemID }
 						};
 					}
 				}
@@ -67,6 +67,41 @@ app.get("/customers", (req,res) => {
 			res.status(err ? 500:200).json(err || mappedCustomers);
 		});
 	})
+});
+
+app.post("/orders", (req, res) => {
+	const orders = req.body;
+	let filteredOrders;
+	const customerID = orders[0].custID;
+	let rowID;
+	let sql = `INSERT INTO orders(cust_id,created_by) VALUES(?,?)`;
+	// let bulkPlaceholders = orders.map((ord) => '(?)').join(',');
+	let sqlBulk;
+	db.run(sql, [customerID, 1], function(err){
+		if(err) return console.error(err.message);
+		console.log("Inserted Order successfully");
+		rowID = this.lastID;
+		// console.log("HAS INSERTED BITCHEZ. ID is now: " + this.lastID);
+		//  filteredOrders = orders.map((ord) => {
+		// 	return {
+		// 		order_id: rowID,
+		// 		item_id: ord.itemID,
+		// 		quantity: ord.quantity,
+		// 		unit_orice: ord.price,
+		// 		price: ord.totalPrice
+		// 	}
+		// });
+		let bulkPlaceholders = orders.map((ord) => {
+			return `(${rowID},${ord.itemID},${ord.quantity},${ord.price},${ord.totalPrice})`
+		});
+		sqlBulk = `INSERT INTO order_details(order_id, item_id, quantity, unit_price, price) VALUES ` + bulkPlaceholders;
+		db.run(sqlBulk, function(err){
+			if(err) return console.error("Error on bulk: " + err);
+			console.log(`Rows inserted ${this.changes}`);
+		});
+	})
+
+	
 });
 
 app.post("/verify", (req,res) => {

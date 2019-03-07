@@ -13,48 +13,22 @@ class Receipt extends Component{
             orders: [],
             showSummary: "hide"
         };
-        this.customers = [
-            {
-                id: 0,
-                name: "----------"
-            },
-            {
-                id: 1,
-                name: "Jason Marketing",
-                price: {
-                    XL: { case: 200, tray: 100 },
-                    L: { case: 150, tray: 50 },
-                    M: { case: 100, tray: 20 }
-                }
-            },
-            {
-                id: 2,
-                name: "SBJ Tracking",
-                price: {
-                    goodCrackBig: { case: 50 },
-                    juice: { case: 15 },
-                    plasticEgg: { kilo: 10 }
-                }
-            },
-            {
-                id: 3,
-                name: "SBJ Tracking",
-                price: {
-                    goodCrackBig: { case: 50 },
-                    juice: { case: 15 },
-                    plasticEgg: { kilo: 10 }
-                }
-            }
-        ];
         this.order = [];
         this.getCustomers = this.getCustomers.bind(this);
         this.chooseCustomer = this.chooseCustomer.bind(this);
         this.chooseItem = this.chooseItem.bind(this);
+        this.submitOrder = this.submitOrder.bind(this);
         this.getCustomers();
     }
 
+    submitOrder(){
+        const orders = this.state.orders;
+        axios.post("http://localhost:3001/orders", orders).then((res) => {
+            console.log(res);
+        });
+    }
+
     getCustomers(){
-        // let customers = [];
         axios.get('http://localhost:3001/customers').then((res) => {
             this.setState({
                 allCustomers: res.data,
@@ -66,7 +40,8 @@ class Receipt extends Component{
     chooseCustomer(){
         this.setState({
             customer: this.refs.chosenCustomer.value,
-            item: ""
+            item: "",
+            orders: []
         });
         this.refs.itemQuantity.value = "";
     }
@@ -80,7 +55,7 @@ class Receipt extends Component{
     addOrder(e){
         const allCustomers = this.state.allCustomers ? this.state.allCustomers : [];
         const chosenCustomer = this.state.customer;
-        let customerDetails = this.allCustomers.find((cust) => {
+        let customerDetails = allCustomers.find((cust) => {
             return cust.name === chosenCustomer
         });
 
@@ -89,15 +64,17 @@ class Receipt extends Component{
         let item = this.refs.itemValue.value;
         let quantity = this.refs.itemQuantity.value;
         let unit = this.refs.itemUnit.value;
-        let price = customerDetails.price[item][unit.toLowerCase()];
+        let price = customerDetails.price[item][unit].price;
+        let itemID = customerDetails.price[item][unit].id;
         let totalPrice = price * quantity;
-
         orders.push({
+            custID: customerDetails.id,
             item: item,
             quantity: quantity,
             unit: unit,
             price: price,
-            totalPrice: totalPrice
+            totalPrice: totalPrice,
+            itemID: itemID
         });
         this.setState({
             orders: orders,
@@ -195,7 +172,7 @@ class Receipt extends Component{
                         </tbody>
                     </table>
                     <div className="row just-end order-button">
-                        <button type="button">Submit Order</button>
+                        <button type="button" onClick={(e) => this.submitOrder()}>Submit Order</button>
                     </div>
                 </div>
             </div>
