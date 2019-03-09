@@ -1,17 +1,23 @@
 import React, {Component} from 'react';
 import {Route, Link, withRouter} from 'react-router-dom';
+import axios from 'axios';
 
 class History extends Component{
 	constructor(props){
 		super(props);
 		this.customerID = props.match.params.id ? props.match.params.id : 0;
 		this.customerName = "Jason Manufacturing";
-		this.itemUnits = [
-			{item: "XL", units: ["Case","Tray"]},
-			{item: "L", units: ["Case","Tray"]},
-			{item: "Jumbo", units: ["Case","Tray"]}
-		];
+		// this.itemUnits = [
+		// 	{item: "XL", units: ["Case","Tray"]},
+		// 	{item: "L", units: ["Case","Tray"]},
+		// 	{item: "Jumbo", units: ["Case","Tray"]}
+		// ];
 		this.historyMapping = [];
+		this.state = {
+			history: [],
+			historyMapping: [],
+			itemUnits: []
+		};
 		this.history = [
             {
             	cust_id: 0,
@@ -54,29 +60,58 @@ class History extends Component{
             	modified_by: "Metz"
             }
         ];
+        this.mapHistory = this.mapHistory.bind(this);
+        this.getItems = this.getItems.bind(this);
         this.mapHistory();
 	}
 
-	mapHistory(){
-		this.history.forEach((val, key) => {
-			let row = [];
-			row.push(val.modified);
-			this.itemUnits.forEach((i) => {
-				i.units.forEach((u) => {
-					if(val.item === i.item && val.unit === u){
-						row.push(val.price);
-					}else{
-						row.push("");
-					}
+	getItems(history){
+		let allItems = [];
+		history.forEach((hist) => {
+			if(allItems.find(item => item.item === hist.item)){
+				if(!allItems.find(item => item.item === hist.item).units.find(unit => unit === hist.unit)){
+					allItems.find(item => item.item === hist.item).units.push(hist.unit);
+				}
+			}else{
+				allItems.push({
+					item: hist.item,
+					units: [hist.unit]
 				});
+			}
+		});
+		return allItems;
+	}
+
+	mapHistory(){
+		let itemUnits = [];
+		axios.get('http://localhost:3001/history/' + this.customerID).then((res) => {
+			itemUnits = this.getItems(res.data);
+			let historyMapping = [];
+			res.data.forEach((val, key) => {
+				let row = [];
+				row.push(val.modified);
+				itemUnits.forEach((i) => {
+					i.units.forEach((u) => {
+						if(val.item === i.item && val.unit === u){
+							row.push(val.price);
+						}else{
+							row.push("");
+						}
+					});
+				});
+				historyMapping.push(row);
 			});
-			this.historyMapping.push(row);
+			this.setState({
+				historyMapping: historyMapping,
+				itemUnits: itemUnits
+			});
 		});
 	}
 
 	render(){
 		const customerName = this.customerName;
-		const historyMapping = this.historyMapping.length ? this.historyMapping.map((val, key) => {
+
+		const historyMapping = this.state.historyMapping.length ? this.state.historyMapping.map((val, key) => {
 			return(
 				<tr key={key}>
 				{
@@ -89,14 +124,14 @@ class History extends Component{
 				</tr>
 			)
 		}) : [];
-		const tableItems = this.itemUnits.length ? this.itemUnits.map((val, key) => {
+		const tableItems = this.state.itemUnits.length ? this.state.itemUnits.map((val, key) => {
 			return(
 				<th colSpan={val.units.length} key={key}>
 					{val.item}
 				</th>
 			)	
 		}) : [];
-		const tableUnits = this.itemUnits.length ? this.itemUnits.map((val, key) => {
+		const tableUnits = this.state.itemUnits.length ? this.state.itemUnits.map((val, key) => {
 			return(
 				val.units.map((val2) => {
 					return(

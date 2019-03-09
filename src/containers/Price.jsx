@@ -113,10 +113,7 @@ class Price extends Component{
 				loggedIn: loggedIn
 			};
 			axios.post('http://localhost:3001/price', postBody).then((res) => {
-				this.setState({
-					items: items,
-					originalItems: refItems
-				});
+				this.getCustomer();
 			}).catch((err) => {
 				alert("Unable to update prices");
 			});

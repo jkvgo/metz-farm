@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import DatePicker from 'react-datepicker';
 import jsPDF from 'jspdf';
+import axios from 'axios';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -55,12 +56,24 @@ class Report extends Component{
     }
 
     generateReport(){
-    	this.setState({
-    		receipts: this.receipts
-    	});
-        var doc = new jsPDF();
-        doc.text("Hello World", 10, 10);
-        doc.save('a4.pdf');
+        const startDate = this.state.startDate ? this.state.startDate : "";
+        const endDate = this.state.endDate ? this.state.endDate : "";
+        let range = {
+            startDate: startDate,
+            endDate: endDate
+        };
+        axios.post('http://localhost:3001/report', range).then((res) => {
+            console.log(res.data);
+            this.setState({
+                receipts: res.data
+            });
+        });
+    	// this.setState({
+    	// 	receipts: this.receipts
+    	// });
+        // var doc = new jsPDF();
+        // doc.text("Hello World", 10, 10);
+        // doc.save('a4.pdf');
     }
     
     render(){

@@ -33,6 +33,19 @@ app.get("/", (req,res) => {
 	})
 });
 
+app.get("/history/:id", (req, res) => {
+	let id = req.params.id;
+	let results = [];
+	let sql = `select ch.cust_id, i.item, i.unit, ch.price, ch.modified, ch.modified_by from customer_history ch, items i where ch.item_id = i.id and ch.cust_id = ${id}`;
+	db.serialize(() => {
+		db.each(sql, (err, row) => {
+			results.push(row);
+		}, (err) => {
+			res.status(err ? 500:200).json(err || results);
+		});
+	});
+});
+
 app.get("/customers/:id", (req, res) => {
 	let id = req.params.id;
 	let customerPrice = {}, results = [];
@@ -96,6 +109,39 @@ app.get("/customers", (req,res) => {
 			res.status(err ? 500:200).json(err || mappedCustomers);
 		});
 	})
+});
+
+app.post('/report', (req, res) => {
+	const range = req.body;
+	let orders = [], currOrder, mappedReceipts = [];
+	let sql = `select o.id, o.cust_id, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i where o.id = od.order_id and od.item_id = i.id and  o.created BETWEEN '${range.startDate}' AND '${range.endDate}' order by o.id`;
+	db.serialize(() => {
+		db.each(sql, (err, row) => {
+			orders.push(row);
+		}, (err) => {
+			orders.forEach((ord) => {
+				if(currOrder === ord.id){
+					mappedReceipts.find(r => r.receiptID === ord.id).orders.push(
+						{
+							item: ord.item,
+							quantity: ord.quantity,
+							unit: ord.unit,
+							price: ord.unit_price,
+							total: ord.price
+						}
+					);
+				}else{
+					mappedReceipts.push({
+						receiptID: ord.id,
+						customer: ord.cust_id,
+						orders: [ {item: ord.item, quantity: ord.quantity, unit: ord.unit, price: ord.unit_price, total: ord.price} ]
+					});
+					currOrder = ord.id;
+				}
+			});
+			res.status(err ? 500:200).json(err || mappedReceipts);
+		});
+	});
 });
 
 app.post("/orders", (req, res) => {
@@ -162,15 +208,17 @@ app.post("/price", (req,res) => {
 			return console.error("Error on updating customer price: " + err);
 			res.status(500).send();
 		}
-		res.status(200).send();
 		console.log(`Customer price updated ${this.changes}`);
 
 		// Update customer price history table after price-update
 		let priceHistory = `(${customerPrice.customer}, ${customerPrice.item}, ${customerPrice.price}, ${customerPrice.loggedIn})`;
 		let sqlBulk = `INSERT INTO customer_history(cust_id, item_id, price, modified_by) VALUES ` + priceHistory;
 		db.run(sqlBulk, function(err2){
-			if(err2) return console.error("Error on updating customer history: " + err2);
+			if(err2){
+				return console.error("Error on updating customer history: " + err2);
+			}
 			console.log(`Customer history inserted ${this.changes}`);
+			res.status(200).send();
 		});
 	});
 });
