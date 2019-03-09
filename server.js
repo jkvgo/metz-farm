@@ -33,6 +33,35 @@ app.get("/", (req,res) => {
 	})
 });
 
+app.get("/customers/:id", (req, res) => {
+	let id = req.params.id;
+	let customerPrice = {}, results = [];
+ 	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price, cp.modified from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id and c.id = ${id}`;
+ 	db.serialize(() => {
+ 		db.each(sql, (err, row) => {
+ 			results.push(row);
+ 		}, (err) => {
+ 			if(results){
+ 				customerPrice = {
+	 				id: results[0].id,
+	 				name: results[0].name,
+	 				price: {}
+	 			}
+	 			results.forEach((item) => {
+	 				if(customerPrice.price.hasOwnProperty(item.item)){
+	 					customerPrice.price[item.item][item.unit] = {price: item.price, id: item.itemID, modified: item.modified};
+	 				}else{
+	 					customerPrice.price[item.item] = {
+	 						[item.unit]: {price: item.price, id: item.itemID, modified: item.modified}
+	 					}
+	 				}
+	 			});
+ 			}
+ 			res.status(err ? 500:200).json(err || customerPrice);
+ 		});
+ 	});
+});
+
 app.get("/customers", (req,res) => {
 	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id order by c.id`;
 	let customers = [], mappedCustomers;
@@ -125,7 +154,26 @@ app.post("/verify", (req,res) => {
 	});
 });
 
+app.post("/price", (req,res) => {
+	let customerPrice = req.body;
+	let sql = `UPDATE customer_price SET price = ${customerPrice.price} WHERE cust_id = ${customerPrice.customer} AND item_id = ${customerPrice.item}`;
+	db.run(sql, function(err){
+		if(err){
+			return console.error("Error on updating customer price: " + err);
+			res.status(500).send();
+		}
+		res.status(200).send();
+		console.log(`Customer price updated ${this.changes}`);
 
+		// Update customer price history table after price-update
+		let priceHistory = `(${customerPrice.customer}, ${customerPrice.item}, ${customerPrice.price}, ${customerPrice.loggedIn})`;
+		let sqlBulk = `INSERT INTO customer_history(cust_id, item_id, price, modified_by) VALUES ` + priceHistory;
+		db.run(sqlBulk, function(err2){
+			if(err2) return console.error("Error on updating customer history: " + err2);
+			console.log(`Customer history inserted ${this.changes}`);
+		});
+	});
+});
 
 app.listen(port, '0.0.0.0', function(){
 	console.log("Listening on: " + port);

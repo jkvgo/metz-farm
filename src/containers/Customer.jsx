@@ -6,28 +6,9 @@ class Customer extends Component{
     constructor(props){
         super(props);
         this.state = {
+            allCustomers: [],
             path: props.match.path
         };
-        this.customers = [
-            {
-                id: 0,
-                name: "Jason Marketing",
-                price: {
-                    XL: { case: 200, tray: 100 },
-                    L: { case: 150, tray: 50 },
-                    M: { case: 100, tray: 20 }
-                }
-            },
-            {
-                id: 1,
-                name: "SBJ Tracking",
-                price: {
-                    goodCrackBig: { case: 50 },
-                    juice: { case: 15 },
-                    plasticEgg: { kilo: 10 }
-                }
-            }
-        ];
         this.customers = [];
         this.getCustomers = this.getCustomers.bind(this);
         this.getCustomers();
@@ -35,13 +16,16 @@ class Customer extends Component{
 
     getCustomers(){
         axios.get('http://localhost:3001/customers').then((res) => {
-            console.log(res);
+            this.setState({
+                allCustomers: res.data
+            });
         });
     }
     
     render(){
+        const allCustomers = this.state.allCustomers ? this.state.allCustomers : [];
         const currentPath = this.state.path ? this.state.path : "";
-        let customers = this.customers.map((cust, key) => {
+        let customers = allCustomers.map((cust, key) => {
             return (
                 <div className="row customer-item just-between align-center" key={key}>
                     <p>{key+1}</p>
