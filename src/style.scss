@@ -268,6 +268,34 @@ table{
         b{
             flex-grow: 1;
         }
+        input{
+            display: none;
+        }
+    }
+    .customer-item.new{
+        justify-content: flex-start;
+        b,a{
+            display: none;
+        }
+        input{
+            display: block;
+        }
+    }
+    .edit-controls.false{
+        .add-button{
+            display: block;
+        }
+        .submit-button,.cancel-button{
+            display: none;
+        }
+    }
+    .edit-controls.true{
+        .add-button{
+            display: none;
+        }
+        .submit-button,.cancel-button{
+            display: block;
+        }
     }
 }
 
@@ -375,6 +403,18 @@ table{
             display: none;
         }
         .update-value{
+            display: block;
+        }
+    }
+    .add-button{
+        display: block;
+        &.true{
+            display: none;
+        }
+    }
+    .cancel-button,.submit-button{
+        display: none;
+        &.true{
             display: block;
         }
     }

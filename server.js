@@ -114,7 +114,7 @@ app.get("/customers", (req,res) => {
 app.post('/report', (req, res) => {
 	const range = req.body;
 	let orders = [], currOrder, mappedReceipts = [];
-	let sql = `select o.id, o.cust_id, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i where o.id = od.order_id and od.item_id = i.id and  o.created BETWEEN '${range.startDate}' AND '${range.endDate}' order by o.id`;
+	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and  o.created BETWEEN '${range.startDate}' AND '${range.endDate}' order by o.id`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			orders.push(row);
@@ -133,7 +133,7 @@ app.post('/report', (req, res) => {
 				}else{
 					mappedReceipts.push({
 						receiptID: ord.id,
-						customer: ord.cust_id,
+						customer: ord.name,
 						orders: [ {item: ord.item, quantity: ord.quantity, unit: ord.unit, price: ord.unit_price, total: ord.price} ]
 					});
 					currOrder = ord.id;
@@ -142,6 +142,28 @@ app.post('/report', (req, res) => {
 			res.status(err ? 500:200).json(err || mappedReceipts);
 		});
 	});
+});
+
+app.post("/customers", (req, res) => {
+	const customer = req.body;
+	let sql = `INSERT INTO customers(name,modified) VALUES(?,?)`;
+	db.run(sql, [customer.name, customer.modified], function(err){
+		if(err){
+			return console.error(err.message);
+			res.status(500).json(err);
+		}
+		console.log("Inserted Customers successfully");
+		let customerID = this.lastID;
+		let sqlPrice = `INSERT INTO customer_price(cust_id,item_id,price,modified) VALUES (?,?,?,?)`;
+		db.run(sqlPrice, [customerID, 1, 0, customer.modified], function(err2){
+			if(err2){
+				return console.error("Error on inserting to customer_price table: " + err2.message);
+				res.status(500).json(err);	
+			}
+			res.status(200).send();
+			console.log("New customer default price inserted successfully");
+		})
+	})
 });
 
 app.post("/orders", (req, res) => {
@@ -156,22 +178,12 @@ app.post("/orders", (req, res) => {
 		if(err) return console.error(err.message);
 		console.log("Inserted Order successfully");
 		rowID = this.lastID;
-		// console.log("HAS INSERTED BITCHEZ. ID is now: " + this.lastID);
-		//  filteredOrders = orders.map((ord) => {
-		// 	return {
-		// 		order_id: rowID,
-		// 		item_id: ord.itemID,
-		// 		quantity: ord.quantity,
-		// 		unit_orice: ord.price,
-		// 		price: ord.totalPrice
-		// 	}
-		// });
 		let bulkPlaceholders = orders.map((ord) => {
 			return `(${rowID},${ord.itemID},${ord.quantity},${ord.price},${ord.totalPrice})`
 		});
 		sqlBulk = `INSERT INTO order_details(order_id, item_id, quantity, unit_price, price) VALUES ` + bulkPlaceholders;
-		db.run(sqlBulk, function(err){
-			if(err) return console.error("Error on bulk: " + err);
+		db.run(sqlBulk, function(err2){
+			if(err2) return console.error("Error on bulk: " + err);
 			console.log(`Rows inserted ${this.changes}`);
 		});
 	})
