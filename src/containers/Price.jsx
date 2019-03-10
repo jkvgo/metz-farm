@@ -26,9 +26,11 @@ class Price extends Component{
         		unit: "",
         		price: 0
         	},
-        	addMode: false
+        	addMode: false,
+        	itemsReference: []
         };
         this.getCustomer = this.getCustomer.bind(this);
+        this.getItemsReference = this.getItemsReference.bind(this);
         this.mapCustomerPrices = this.mapCustomerPrices.bind(this);
 
         this.addItem = this.addItem.bind(this);
@@ -38,7 +40,7 @@ class Price extends Component{
         this.setNewUnit = this.setNewUnit.bind(this);
         this.setNewPrice = this.setNewPrice.bind(this);
         this.getCustomer();
-        
+        this.getItemsReference();
 	}
 
 	getCustomer(){
@@ -48,6 +50,14 @@ class Price extends Component{
             });
             this.mapCustomerPrices();
         });
+	}
+
+	getItemsReference(){
+		axios.get('http://localhost:3001/items').then((res) => {
+			this.setState({
+				itemsReference: res.data
+			});
+		})
 	}
 
 	mapCustomerPrices(){
@@ -171,8 +181,26 @@ class Price extends Component{
 	}
 
 	submitNewItem(){
-		const newItem = this.state.newItem ? this.state.newItem : {};
-
+		const newItem = {
+			item: this.refs.newItem.value,
+			unit: this.refs.newUnit.value,
+			price: this.state.newItem.price
+		};
+		const itemsReference = this.state.itemsReference.length ? this.state.itemsReference : [];
+		let itemID = itemsReference.filter((ir) => {
+			return ir.item === newItem.item && ir.unit === newItem.unit;
+		})
+		let submitItem = {
+			cust_id: this.customerID,
+			item_id: itemID[0].id,
+			price: newItem.price,
+			loggedIn: this.state.loggedIn
+		};
+		axios.post('http://localhost:3001/addprice', submitItem).then((res) => {
+			this.getCustomer();
+		}).catch((err) => {
+			alert("Unable to add prices");
+		});
 	}
 
 	setNewItem(val){
@@ -200,6 +228,30 @@ class Price extends Component{
 	}
 
 	render(){
+		const itemsReference = this.state.itemsReference.length ? this.state.itemsReference : [];
+		const newItem = this.state.newItem ? this.state.newItem : {};
+		let uniqueItems = [];
+		itemsReference.forEach((i) => {
+			if(uniqueItems.indexOf(i.item) === -1){
+				uniqueItems.push(i.item);
+			}
+		});
+		let unitsFromItem = this.state.unitFromItem.length ? this.state.unitFromItem.filter((i) => {
+			return i.item === newItem.item;
+		}) : [];
+		// let unitsFromItem = itemsReference.length ? itemsReference.filter((i) => {
+		// 	return i.item === newItem.item;
+		// }) : [];
+		const itemElements = uniqueItems.length ? uniqueItems.map((u) => {
+			return (
+				<option key={u}>{u}</option>
+			)
+		}) : [];
+		const unitElements = unitsFromItem.length ? unitsFromItem.map((ui) => {
+			return (
+				<option key={ui.unit}>{ui.unit}</option>
+			)
+		}) : [];
 		const customer = this.customer;
 		const newItemPrice = this.state.newItem.price;
 		const addMode = this.state.addMode;
@@ -208,15 +260,13 @@ class Price extends Component{
 				return (
 					<tr key={key}>
 						<td>
-							<select onChange={(e) => this.setNewItem(e.target.value)}>
-								<option>Jumbo</option>
-								<option>XL</option>
+							<select ref="newItem" onChange={(e) => this.setNewItem(e.target.value)}>
+								{itemElements}
 							</select>
 						</td>
 						<td>
-							<select onChange={(e) => this.setNewUnit(e.target.value)}>
-								<option>Case</option>
-								<option>Tray</option>
+							<select ref="newUnit" onChange={(e) => this.setNewUnit(e.target.value)}>
+								{unitElements}
 							</select>
 						</td>
 						<td>

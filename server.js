@@ -75,6 +75,16 @@ app.get("/customers/:id", (req, res) => {
  	});
 });
 
+app.get("/items", (req,res) => {
+	let sql = `select id, item, unit from items`;
+	let items = [];
+	db.each(sql, (err,row) => {
+		items.push(row);
+	}, (err) => {
+		res.status(err ? 500:200).json(err || items);
+	})
+});
+
 app.get("/customers", (req,res) => {
 	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id order by c.id`;
 	let customers = [], mappedCustomers;
@@ -232,6 +242,19 @@ app.post("/price", (req,res) => {
 			console.log(`Customer history inserted ${this.changes}`);
 			res.status(200).send();
 		});
+	});
+});
+
+app.post("/addprice", (req,res) => {
+	let newItem = req.body;
+	let sql = `INSERT INTO customer_price(cust_id,item_id,price,modified) VALUES(?,?,?,?)`;
+	db.run(sql, [newItem.cust_id, newItem.item_id, newItem.price, newItem.loggedIn], function(err){
+		if(err){
+			return console.error("Error on inserting to customer_price table: " + err.message);
+			res.status(500).json(err);	
+		}
+		res.status(200).send();
+		console.log("Added new customer price successfully");
 	});
 });
 
