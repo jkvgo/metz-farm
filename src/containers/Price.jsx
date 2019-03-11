@@ -6,16 +6,6 @@ class Price extends Component{
 	constructor(props){
 		super(props);
 		this.customerID = props.match.params.id ? props.match.params.id : 0;
-		this.customer = {
-            id: 0,
-            name: "Jason Marketing",
-            price: {
-                XL: { case: 200, tray: 100 },
-                L: { case: 150, tray: 50 },
-                M: { case: 100, tray: 20 }
-            }
-        }
-        
         this.state = {
         	customer: {},
         	originalItems: [],
@@ -157,12 +147,15 @@ class Price extends Component{
 
 	addItem(){
 		let allItems = this.state.items.length ? this.state.items : [];
+		let newItem = this.state.newItem;
 		allItems.push({
 			type: "new"
 		})
+		newItem.item = "Jumbo";
 		this.setState({
 			items: allItems,
-			addMode: true
+			addMode: true,
+			newItem: newItem
 		});
 	}
 
@@ -187,20 +180,28 @@ class Price extends Component{
 			price: this.state.newItem.price
 		};
 		const itemsReference = this.state.itemsReference.length ? this.state.itemsReference : [];
+		const existingItems = this.state.items.length ? this.state.items : [];
 		let itemID = itemsReference.filter((ir) => {
 			return ir.item === newItem.item && ir.unit === newItem.unit;
-		})
-		let submitItem = {
-			cust_id: this.customerID,
-			item_id: itemID[0].id,
-			price: newItem.price,
-			loggedIn: this.state.loggedIn
-		};
-		axios.post('http://localhost:3001/addprice', submitItem).then((res) => {
-			this.getCustomer();
-		}).catch((err) => {
-			alert("Unable to add prices");
-		});
+		}).length ? itemsReference.filter((ir) => {
+			return ir.item === newItem.item && ir.unit === newItem.unit;
+		})[0].id : 0;
+		let alreadyHasPrice = existingItems.find((i) => i.itemID === itemID);
+		if(alreadyHasPrice){
+			alert("This customer already has this price. Please update price instead");
+		}else{
+			let submitItem = {
+				cust_id: this.customerID,
+				item_id: itemID,
+				price: newItem.price,
+				loggedIn: this.state.loggedIn
+			};
+			axios.post('http://localhost:3001/addprice', submitItem).then((res) => {
+				this.getCustomer();
+			}).catch((err) => {
+				alert("Unable to add prices");
+			});
+		}
 	}
 
 	setNewItem(val){
@@ -229,6 +230,7 @@ class Price extends Component{
 
 	render(){
 		const itemsReference = this.state.itemsReference.length ? this.state.itemsReference : [];
+		const customer = this.state.customer ? this.state.customer : {};
 		const newItem = this.state.newItem ? this.state.newItem : {};
 		let uniqueItems = [];
 		itemsReference.forEach((i) => {
@@ -236,12 +238,10 @@ class Price extends Component{
 				uniqueItems.push(i.item);
 			}
 		});
-		let unitsFromItem = this.state.unitFromItem.length ? this.state.unitFromItem.filter((i) => {
+		// let unitsFromItem = this.state.unitFromItem.length ? this.state.unitFromItem.filter((i) => {}) : [];/
+		let unitsFromItem = itemsReference.length ? itemsReference.filter((i) => {
 			return i.item === newItem.item;
 		}) : [];
-		// let unitsFromItem = itemsReference.length ? itemsReference.filter((i) => {
-		// 	return i.item === newItem.item;
-		// }) : [];
 		const itemElements = uniqueItems.length ? uniqueItems.map((u) => {
 			return (
 				<option key={u}>{u}</option>
@@ -252,7 +252,6 @@ class Price extends Component{
 				<option key={ui.unit}>{ui.unit}</option>
 			)
 		}) : [];
-		const customer = this.customer;
 		const newItemPrice = this.state.newItem.price;
 		const addMode = this.state.addMode;
 		const itemPrices = this.state.items.length ? this.state.items.map((item, key) => {
