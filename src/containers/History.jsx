@@ -14,6 +14,7 @@ class History extends Component{
 		// ];
 		this.historyMapping = [];
 		this.state = {
+			customerName: "",
 			history: [],
 			historyMapping: [],
 			itemUnits: []
@@ -83,9 +84,10 @@ class History extends Component{
 	}
 
 	mapHistory(){
-		let itemUnits = [];
+		let itemUnits = [], customerName;
 		axios.get('http://localhost:3001/history/' + this.customerID).then((res) => {
 			itemUnits = this.getItems(res.data);
+			customerName = res.data.length ? res.data[0].name : "There is no history yet for this customer";
 			let historyMapping = [];
 			res.data.forEach((val, key) => {
 				let row = [];
@@ -103,14 +105,14 @@ class History extends Component{
 			});
 			this.setState({
 				historyMapping: historyMapping,
-				itemUnits: itemUnits
+				itemUnits: itemUnits,
+				customerName: customerName
 			});
 		});
 	}
 
 	render(){
-		const customerName = this.customerName;
-
+		const customerName = this.state.customerName.length ? this.state.customerName : "";
 		const historyMapping = this.state.historyMapping.length ? this.state.historyMapping.map((val, key) => {
 			return(
 				<tr key={key}>

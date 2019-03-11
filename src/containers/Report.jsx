@@ -41,6 +41,7 @@ class Report extends Component{
         this.setStartDate = this.setStartDate.bind(this);
         this.setEndDate = this.setEndDate.bind(this);
         this.generateReport = this.generateReport.bind(this);
+        this.downloadReport = this.downloadReport.bind(this);
     }
 
     setStartDate(date){
@@ -70,9 +71,12 @@ class Report extends Component{
     	// this.setState({
     	// 	receipts: this.receipts
     	// });
-        // var doc = new jsPDF();
-        // doc.text("Hello World", 10, 10);
-        // doc.save('a4.pdf');
+    }
+
+    downloadReport(){
+        var doc = new jsPDF();
+        doc.text("Hello World", 10, 10);
+        doc.save('a4.pdf');
     }
     
     render(){
@@ -137,6 +141,7 @@ class Report extends Component{
             			{receipts}
             		</tbody>
             	</table>
+                <button type="button" className="download-button" onClick={() => this.downloadReport()}>Download</button>
             </div>
         );
     }

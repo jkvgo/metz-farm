@@ -36,7 +36,7 @@ app.get("/", (req,res) => {
 app.get("/history/:id", (req, res) => {
 	let id = req.params.id;
 	let results = [];
-	let sql = `select ch.cust_id, i.item, i.unit, ch.price, ch.modified, ch.modified_by from customer_history ch, items i where ch.item_id = i.id and ch.cust_id = ${id}`;
+	let sql = `select ch.cust_id, c.name, i.item, i.unit, ch.price, ch.modified, ch.modified_by from customers c, customer_history ch, items i where c.id = ch.cust_id and ch.item_id = i.id and ch.cust_id = ${id}`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			results.push(row);
