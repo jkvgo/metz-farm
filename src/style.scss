@@ -450,3 +450,59 @@ table{
         float: right;
     }
 }
+
+#item{
+    a{
+        color: black;
+        text-decoration: none;
+        border: 1px solid black;
+        border-radius: 15px;
+        padding: 5px 15px;
+        margin-left: 20px;
+        transition: all 0.3s;
+    }
+    a:hover{
+        background-color: black;
+        color: white;
+    }
+    a:active{
+        background-color: #2A2A2A;
+    }
+    padding: 0 100px;
+    .item-row{
+        p{
+            margin: 0 20px 0 0;
+        }
+        .item-name{
+            // margin-right: 20px;
+            flex-basis: 20%;
+            text-align: center;
+        }
+        .item-unit{
+            flex-grow: 1;
+        }
+        div:last-child{
+            flex-grow: 1;
+            float: left;
+        }
+    }
+    .item-control{
+        &.true{
+            .add-item{
+                display: none;
+            }
+            .submit-item{
+                display: block;
+            }
+        }
+        &.false{
+            .add-item{
+                display: block;
+            }
+            .submit-item{
+                display: none;
+            }
+            
+    }
+        }
+}

@@ -258,6 +258,19 @@ app.post("/addprice", (req,res) => {
 	});
 });
 
+app.post("/item", (req, res) => {
+	let newItem = req.body;
+	let sql = `INSERT INTO items(item,unit,modified) VALUES(?,?,?)`;
+	db.run(sql, [newItem.item, newItem.unit, newItem.loggedIn], function(err){
+		if(err){
+			return console.error("Error on inserting new item: " + err.message);
+			res.status(500).json(err);
+		}
+		res.status(200).send();
+		console.log("Added new item successfully");
+	});
+});
+
 app.listen(port, '0.0.0.0', function(){
 	console.log("Listening on: " + port);
 });
