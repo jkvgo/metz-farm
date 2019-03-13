@@ -1,15 +1,17 @@
 import React, {Component} from 'react';
+import UserSession from '../UserSession';
 import axios from 'axios';
 
 class Item extends Component{
 	constructor(props){
+		UserSession.redirectToLogin()
 		super(props);
 		this.state = {
 			items: [],
 			newItemName: "",
 			newItemUnit: "",
 			addMode: false,
-			loggedIn: 1
+			loggedIn: UserSession.getLoggedID()
 		};
 		this.getItems = this.getItems.bind(this);
 		this.deleteItem = this.deleteItem.bind(this);

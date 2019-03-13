@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
 import {Route, Link, withRouter} from 'react-router-dom';
+import UserSession from '../UserSession';
 import axios from 'axios';
 
 class History extends Component{
 	constructor(props){
+		UserSession.redirectToLogin()
 		super(props);
 		this.customerID = props.match.params.id ? props.match.params.id : 0;
 		this.customerName = "Jason Manufacturing";

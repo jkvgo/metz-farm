@@ -1,16 +1,18 @@
 import React, {Component} from 'react';
 import {Route, Link, withRouter} from 'react-router-dom';
+import UserSession from '../UserSession';
 import axios from 'axios';
 
 class Customer extends Component{
     constructor(props){
+        UserSession.redirectToLogin()
         super(props);
         this.state = {
             allCustomers: [],
             path: props.match.path,
             editMode: false,
             addCustomer: "",
-            loggedIn: 1
+            loggedIn: UserSession.getLoggedID()
         };
         this.customers = [];
         this.getCustomers = this.getCustomers.bind(this);

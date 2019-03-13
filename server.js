@@ -180,21 +180,21 @@ app.post("/orders", (req, res) => {
 	const orders = req.body;
 	let filteredOrders;
 	const customerID = orders[0].custID;
+	const loggedIn = orders[0].loggedIn;
 	let rowID;
 	let sql = `INSERT INTO orders(cust_id,created_by) VALUES(?,?)`;
 	// let bulkPlaceholders = orders.map((ord) => '(?)').join(',');
 	let sqlBulk;
-	db.run(sql, [customerID, 1], function(err){
-		if(err) return console.error(err.message);
-		console.log("Inserted Order successfully");
+	db.run(sql, [customerID, loggedIn], function(err){
+		if(err) res.status(500).json(err);
 		rowID = this.lastID;
 		let bulkPlaceholders = orders.map((ord) => {
 			return `(${rowID},${ord.itemID},${ord.quantity},${ord.price},${ord.totalPrice})`
 		});
 		sqlBulk = `INSERT INTO order_details(order_id, item_id, quantity, unit_price, price) VALUES ` + bulkPlaceholders;
 		db.run(sqlBulk, function(err2){
-			if(err2) return console.error("Error on bulk: " + err);
-			console.log(`Rows inserted ${this.changes}`);
+			if(err2) res.status(500).json(err);
+			res.status(err ? 500:200).json(err || "Order submitted successfully");
 		});
 	})
 
@@ -207,17 +207,20 @@ app.post("/verify", (req,res) => {
 	let sql = `SELECT * FROM users WHERE name = ? AND password = ?`;
 	db.serialize(() => {
 		db.each(sql, [credentials.username, credentials.password], (err, row) => {
-			if (err) {
-			  console.error(err.message);
-			}
-			verified = true;
-		}, () => {
-			if(verified){
-				res.status(200).send();
-			}else{
-				res.status(500).send();
-			}
+			res.status(err ? 500:200).json(err || row);
 		});
+		// db.each(sql, [credentials.username, credentials.password], (err, row) => {
+		// 	if (err) {
+		// 	  console.error(err.message);
+		// 	}
+		// 	verified = true;
+		// }, () => {
+		// 	if(verified){
+		// 		res.status(200).send();
+		// 	}else{
+		// 		res.status(500).send();
+		// 	}
+		// });
 
 	});
 });

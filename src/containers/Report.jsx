@@ -1,17 +1,24 @@
 import React, {Component} from 'react';
+import UserSession from '../UserSession';
 import DatePicker from 'react-datepicker';
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+// import * as jsPDF from 'jspdf';
 import axios from 'axios';
+window.html2canvas = html2canvas;
 
 import 'react-datepicker/dist/react-datepicker.css';
 
 class Report extends Component{
+
     constructor(props){
+        UserSession.redirectToLogin()
         super(props);
         this.state = {
         	startDate: new Date(),
         	endDate: new Date(),
-        	receipts: []
+        	receipts: [],
+            hideButton: ""
         };
         this.receipts = [
         	{ 
@@ -74,14 +81,32 @@ class Report extends Component{
     }
 
     downloadReport(){
-        var doc = new jsPDF();
-        doc.text("Hello World", 10, 10);
-        doc.save('a4.pdf');
+        this.setState({
+            hideButton: "hide"
+        });
+        const reportDiv = document.getElementById("report");
+        
+        html2canvas(reportDiv).then((canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF();
+            pdf.addImage(imgData, 'PNG', 20, 20, 210, 0);
+            // pdf.addHTML(canvas, function(){
+                pdf.save('report.pdf');
+            // });
+            this.setState({
+                hideButton: ""
+            });
+            // const pdf = new jsPDF();
+            // pdf.addHtml(document.getElementById("report"), function(){
+            //     pdf.save('report.pdf');
+            // })
+        });
     }
     
     render(){
     	const startDate = this.state.startDate;
     	const endDate = this.state.endDate;
+        const hideButton = this.state.hideButton;
     	const receipts = this.state.receipts.length ? this.state.receipts.map((rec) => {
     		return(
 				rec.orders.map((ord, index) => {
@@ -124,7 +149,7 @@ class Report extends Component{
             		To:
             		<DatePicker selected={endDate} onChange={this.setEndDate}/>
             	</div>
-            	<button type="button" onClick={ () => this.generateReport()}>Generate</button>
+            	<button className={hideButton} type="button" onClick={ () => this.generateReport()}>Generate</button>
             	<table>
             		<thead>
             			<tr>

@@ -1,32 +1,40 @@
 import React from 'react';
 import {Redirect} from 'react-router-dom';
+import Cookies from 'universal-cookie';
 
 var UserSession = (function(){
-	var loggedIn = false;
+	const cookies = new Cookies();
+	const loggedIn = cookies.get('loggedIn');
 
 	var getStatus = function(){
 		return loggedIn;
 	}
 
-	var setLoggedIn = function(){
-		loggedIn = true;
+	var setLoggedIn = function(user){
+		cookies.set('loggedIn', true);
+		cookies.set('userID', user.id);
 	}
 
 	var setLoggedOut = function(){
-		loggedIn = false;
+		cookies.set('loggedIn', false);
 	}
 
 	var redirectToLogin = function(){
-		if(getStatus()){
-			return <Redirect to="/login"/>
+		if(getStatus() === "false"){
+			window.location.replace("/login");
 		}
+	}
+
+	var getLoggedID = function(){
+		return cookies.get('userID');
 	}
 
 	return {
 		getStatus: getStatus,
 		setLoggedIn: setLoggedIn,
 		setLoggedOut: setLoggedOut,
-		redirectToLogin: redirectToLogin
+		redirectToLogin: redirectToLogin,
+		getLoggedID: getLoggedID
 	}
 
 })();

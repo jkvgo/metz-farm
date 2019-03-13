@@ -38,7 +38,7 @@ const Routes = () => (
                 </ul>
             </nav>
             <Switch>
-                <Route path="/" exact component={Receipt}/>
+                <Route path="/receipt" exact component={Receipt}/>
                 <Route path="/login" exact component={Login}/>
                 <Route path="/customer" exact component={Customer}/>
                 <Route path="/report" exact component={Report}/>

@@ -31,7 +31,13 @@ class Login extends Component{
 		e.preventDefault();
 		const creds = this.state;
 		axios.post('http://localhost:3001/verify', creds).then((res) => {
-			UserSession.setLoggedIn();
+			const user = res.data;
+			if(user){
+				UserSession.setLoggedIn(user);
+				window.location.replace("/receipt");
+			}else{
+				alert("User not found");
+			}
 		}).catch((err) => {
 			console.error("Unable to Login");
 		});

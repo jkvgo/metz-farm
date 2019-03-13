@@ -1,16 +1,18 @@
 import React, {Component} from 'react';
 import {Route, Link, withRouter} from 'react-router-dom';
+import UserSession from '../UserSession';
 import axios from 'axios';
 
 class Price extends Component{
 	constructor(props){
+		UserSession.redirectToLogin();
 		super(props);
 		this.customerID = props.match.params.id ? props.match.params.id : 0;
         this.state = {
         	customer: {},
         	originalItems: [],
         	items: [],
-        	loggedIn: 1,
+        	loggedIn: UserSession.getLoggedID(),
         	newItem: {
         		item: "",
         		unit: "",
@@ -36,7 +38,8 @@ class Price extends Component{
 	getCustomer(){
 		axios.get('http://localhost:3001/customers/'+this.customerID).then((res) => {
             this.setState({
-                customer: res.data
+                customer: res.data,
+                addMode: false
             });
             this.mapCustomerPrices();
         });

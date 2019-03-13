@@ -5,13 +5,15 @@ import axios from 'axios';
 
 class Receipt extends Component{
     constructor(){
+        UserSession.redirectToLogin();
         super();
         this.state = {
             allCustomers: [],
             customer: "",
             item: "",
             orders: [],
-            showSummary: "hide"
+            showSummary: "hide",
+            loggedIn: UserSession.getLoggedID()
         };
         this.order = [];
         this.getCustomers = this.getCustomers.bind(this);
@@ -24,7 +26,12 @@ class Receipt extends Component{
     submitOrder(){
         const orders = this.state.orders;
         axios.post("http://localhost:3001/orders", orders).then((res) => {
-            console.log(res);
+            if(res.status === 200){
+                alert(res.data);
+                this.getCustomers();
+            }else{
+                alert("Unable to submit order");
+            }
         });
     }
 
@@ -32,7 +39,9 @@ class Receipt extends Component{
         axios.get('http://localhost:3001/customers').then((res) => {
             this.setState({
                 allCustomers: res.data,
-                customer: res.data[0].name
+                customer: res.data[0].name,
+                showSummary: "hide",
+                item: ""
             });
         });
     }
@@ -54,6 +63,7 @@ class Receipt extends Component{
     
     addOrder(e){
         const allCustomers = this.state.allCustomers ? this.state.allCustomers : [];
+        const loggedIn = this.state.loggedIn;
         const chosenCustomer = this.state.customer;
         let customerDetails = allCustomers.find((cust) => {
             return cust.name === chosenCustomer
@@ -69,6 +79,7 @@ class Receipt extends Component{
         let totalPrice = price * quantity;
         orders.push({
             custID: customerDetails.id,
+            loggedIn: loggedIn,
             item: item,
             quantity: quantity,
             unit: unit,
@@ -121,7 +132,6 @@ class Receipt extends Component{
         });
         return(
             <div id="receipt" className="row center-container">
-                {UserSession.redirectToLogin()}
                 <div className="column">
                     <h2>Create Order</h2>
                     <div className="row align-center customer-container">
