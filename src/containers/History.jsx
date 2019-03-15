@@ -8,12 +8,6 @@ class History extends Component{
 		UserSession.redirectToLogin()
 		super(props);
 		this.customerID = props.match.params.id ? props.match.params.id : 0;
-		this.customerName = "Jason Manufacturing";
-		// this.itemUnits = [
-		// 	{item: "XL", units: ["Case","Tray"]},
-		// 	{item: "L", units: ["Case","Tray"]},
-		// 	{item: "Jumbo", units: ["Case","Tray"]}
-		// ];
 		this.historyMapping = [];
 		this.state = {
 			customerName: "",
@@ -103,6 +97,7 @@ class History extends Component{
 						}
 					});
 				});
+				row.push(val.modified_name);
 				historyMapping.push(row);
 			});
 			this.setState({
@@ -153,8 +148,9 @@ class History extends Component{
 				<table>
 					<thead>
 						<tr>
-							<td rowSpan="2"></td>
+							<th rowSpan="2" className="left-text">Modified On</th>
 							{tableItems}
+							<th rowSpan="2" className="left-text">Modified By</th>
 						</tr>
 						<tr>
 							{tableUnits}

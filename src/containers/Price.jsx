@@ -39,7 +39,12 @@ class Price extends Component{
 		axios.get('http://localhost:3001/customers/'+this.customerID).then((res) => {
             this.setState({
                 customer: res.data,
-                addMode: false
+                addMode: false,
+                newItem: {
+	        		item: "",
+	        		unit: "",
+	        		price: 0
+	        	}
             });
             this.mapCustomerPrices();
         });
@@ -95,12 +100,14 @@ class Price extends Component{
 	}
 
 	updateInput(id,value){
-		let items = this.state.items.length ? this.state.items : [];
-		let chosenItemIndex = items.findIndex(item => item.id === id);
-		items[chosenItemIndex].value = value;
-		this.setState({
-			items: items
-		});
+		if(value >= 0){
+			let items = this.state.items.length ? this.state.items : [];
+			let chosenItemIndex = items.findIndex(item => item.id === id);
+			items[chosenItemIndex].value = value;
+			this.setState({
+				items: items
+			});
+		}
 	}
 
 	editPrice(id){
@@ -224,11 +231,13 @@ class Price extends Component{
 	}
 
 	setNewPrice(val){
-		const newItem = this.state.newItem ? this.state.newItem : {};
-		newItem.price = val;
-		this.setState({
-			newItem: newItem
-		});
+		if(val >= 0){
+			const newItem = this.state.newItem ? this.state.newItem : {};
+			newItem.price = val;
+			this.setState({
+				newItem: newItem
+			});
+		}
 	}
 
 	render(){
@@ -291,9 +300,12 @@ class Price extends Component{
 						</td>
 						<td>{item.modified}</td>
 						<td className={"edit-controls " + item.status}>
-							<button className="display-value" type="button" onClick={(e) => this.editPrice(item.id)}>Change Value</button>	
+							<a href="#" className="display-value" onClick={(e) => this.editPrice(item.id)}>Change Value</a>
+							<a href="#" className="update-value" onClick={(e) => this.updatePrice(item.id, item.itemID)}>Update Value</a>
+							<a href="#" className="update-value" onClick={(e) => this.revertPrice(item.id)}>Cancel</a>
+							{/*<button className="display-value" type="button" onClick={(e) => this.editPrice(item.id)}>Change Value</button>	
 							<button className="update-value" type="button" onClick={(e) => this.updatePrice(item.id, item.itemID)}>Update Value</button>	
-							<button className="update-value" type="button" onClick={(e) => this.revertPrice(item.id)}>Cancel</button>
+							<button className="update-value" type="button" onClick={(e) => this.revertPrice(item.id)}>Cancel</button>*/}
 						</td>
 					</tr>
 				);
@@ -308,7 +320,7 @@ class Price extends Component{
 							<th>Item</th>
 							<th>Unit</th>
 							<th>Price</th>
-							<th>Changed By</th>
+							<th>Last Changed By</th>
 							<th></th>
 						</tr>
 					</thead>

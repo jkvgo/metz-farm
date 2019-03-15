@@ -36,7 +36,7 @@ app.get("/", (req,res) => {
 app.get("/history/:id", (req, res) => {
 	let id = req.params.id;
 	let results = [];
-	let sql = `select ch.cust_id, c.name, i.item, i.unit, ch.price, ch.modified, ch.modified_by from customers c, customer_history ch, items i where c.id = ch.cust_id and ch.item_id = i.id and ch.cust_id = ${id}`;
+	let sql = `select ch.cust_id, c.name, i.item, i.unit, ch.price, ch.modified, ch.modified_by, u.name as 'modified_name' from customers c, customer_history ch, items i, users u where c.id = ch.cust_id and ch.item_id = i.id and ch.modified_by = u.id and ch.cust_id = ${id}`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			results.push(row);
@@ -49,7 +49,7 @@ app.get("/history/:id", (req, res) => {
 app.get("/customers/:id", (req, res) => {
 	let id = req.params.id;
 	let customerPrice = {}, results = [];
- 	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price, cp.modified from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id and c.id = ${id}`;
+ 	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price, cp.modified, u.name as 'modified_name' from customers c, customer_price cp, items i, users u where c.id = cp.cust_id and cp.item_id = i.id and cp.modified = u.id and c.id = ${id}`;
  	db.serialize(() => {
  		db.each(sql, (err, row) => {
  			results.push(row);
@@ -62,10 +62,10 @@ app.get("/customers/:id", (req, res) => {
 	 			}
 	 			results.forEach((item) => {
 	 				if(customerPrice.price.hasOwnProperty(item.item)){
-	 					customerPrice.price[item.item][item.unit] = {price: item.price, id: item.itemID, modified: item.modified};
+	 					customerPrice.price[item.item][item.unit] = {price: item.price, id: item.itemID, modified: item.modified_name};
 	 				}else{
 	 					customerPrice.price[item.item] = {
-	 						[item.unit]: {price: item.price, id: item.itemID, modified: item.modified}
+	 						[item.unit]: {price: item.price, id: item.itemID, modified: item.modified_name}
 	 					}
 	 				}
 	 			});
@@ -209,19 +209,6 @@ app.post("/verify", (req,res) => {
 		db.each(sql, [credentials.username, credentials.password], (err, row) => {
 			res.status(err ? 500:200).json(err || row);
 		});
-		// db.each(sql, [credentials.username, credentials.password], (err, row) => {
-		// 	if (err) {
-		// 	  console.error(err.message);
-		// 	}
-		// 	verified = true;
-		// }, () => {
-		// 	if(verified){
-		// 		res.status(200).send();
-		// 	}else{
-		// 		res.status(500).send();
-		// 	}
-		// });
-
 	});
 });
 

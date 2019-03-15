@@ -5,7 +5,7 @@ import axios from 'axios';
 
 class Customer extends Component{
     constructor(props){
-        UserSession.redirectToLogin()
+        UserSession.redirectToLogin();
         super(props);
         this.state = {
             allCustomers: [],
@@ -99,7 +99,7 @@ class Customer extends Component{
         return(
             <div id="customer" className="column center-container">
                 {customers}
-                <div className={"row edit-controls " + editMode}>
+                <div className={"row edit-controls just-end " + editMode}>
                     <button className="button add-button" onClick={() => this.addCustomer()}>Add Customer</button>
                     <button className="button cancel-button" onClick={() => this.cancelEdit()}>Cancel</button>
                     <button className="button submit-button" onClick={() => this.submitCustomer()}>Submit</button>

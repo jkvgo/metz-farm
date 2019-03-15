@@ -85,11 +85,23 @@
     margin: 0 40px;
 }
 
+.left-text{
+    text-align: left !important;
+}
+
+.margin-top-70{
+    margin-top: 70px;
+}
+
 // CUSTOM CSS
 
 body{
     font-family: 'Tahoma';
     margin: 0;
+}
+
+h2,h3{
+    font-weight: 400;
 }
 
 button{
@@ -119,6 +131,30 @@ table{
         tr:hover{
             background-color: #DEDEDE;
         }
+    }
+}
+
+// NAVIGATION ----------------
+// ---------------------------
+
+#navigation{
+    padding: 0 40px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    a{
+        text-decoration: none;
+        color: black;
+    }
+    a:not(.main-logo){
+        margin-left: 20px;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s;
+    }
+    a:not(.main-logo):hover{
+        border-bottom: 2px solid black;
     }
 }
 
@@ -169,6 +205,7 @@ table{
 // ------------------------
 
 #receipt{
+    margin-top: 70px;
     select,input{
         margin-left: 20px;
         font-size: 20px;
@@ -176,17 +213,27 @@ table{
     .customer-container{
 
     }
-    .form-item{
-        margin-bottom: 20px;
-        display: flex;
-        flex-flow: row nowrap;
-        align-items: center;
-        select,input{
-            flex-grow: 1;
+    .order-form{
+        padding: 20px;
+        border: 1px solid gray;
+        border-radius: 10px;
+        background-color: #F5F5F5;
+        select{
+            background-color: #ffffff;
         }
-    }
-    .add-button{
-        margin-top: 50px;
+        .form-item{
+            margin-bottom: 20px;
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            select,input{
+                flex-grow: 1;
+                background-color: #ffffff;
+            }
+        }
+        .add-button{
+            margin-top: 50px;
+        }
     }
     .order-display{
         margin-left: 50px;
@@ -216,29 +263,11 @@ table{
     }
 }
 
-// NAVIGATION ----------------
-// ---------------------------
-
-#navigation{
-    padding: 0 40px;
-    a{
-        text-decoration: none;
-        color: black;
-    }
-    a:not(.main-logo){
-        margin-left: 20px;
-        border-bottom: 2px solid transparent;
-        transition: all 0.3s;
-    }
-    a:not(.main-logo):hover{
-        border-bottom: 2px solid black;
-    }
-}
-
 // CUSTOMER ----------------
 // -------------------------
 
 #customer{
+    margin-top: 70px;
     a{
         color: black;
         text-decoration: none;
@@ -259,9 +288,9 @@ table{
         margin-top: 30px;
     }
     .customer-item{
-        margin-bottom: 10px;
-        padding: 0 100px;
-        // width: 80%;
+        margin: 0 100px;
+        padding: 10px 0;
+        border-top: 1px solid #F0F0F0;
         p{
             margin: 0 30px 0 0;
         }
@@ -281,32 +310,45 @@ table{
             display: block;
         }
     }
-    .edit-controls.false{
-        .add-button{
-            display: block;
+    .customer-item:last-of-type{
+        border-top: none;
+    }
+    .edit-controls{
+        margin: 30px 100px 0;
+        &.false{
+            .add-button{
+                display: block;
+            }
+            .submit-button,.cancel-button{
+                display: none;
+            }
         }
-        .submit-button,.cancel-button{
-            display: none;
+        &.true{
+            .add-button{
+                display: none;
+            }
+            .submit-button,.cancel-button{
+                display: block;
+            }
         }
     }
-    .edit-controls.true{
-        .add-button{
-            display: none;
-        }
-        .submit-button,.cancel-button{
-            display: block;
-        }
-    }
+    // .edit-controls.false{
+            
+    // }
+    // .edit-controls.true{
+            
+    // }
 }
 
 // HISTORY ----------------
 // ------------------------
 
 #history{
+    margin-top: 70px;
+    padding: 0 50px;
     table{
-        margin-top: 20px;
-        width: 60%;
-        margin-bottom: 30px;
+        margin: 20px 0 30px;
+        width: 100%;
         td{
             text-align: left;
         }
@@ -322,8 +364,14 @@ table{
             }
         } 
         tbody{
+            tr{
+                border-top: 1px solid #F0F0F0;
+            }
+            tr:first-child{
+                border-top: none;
+            }
             td{
-                padding-top: 10px;
+                padding: 20px 0;
                 vertical-align: middle;
             }
         }
@@ -352,10 +400,20 @@ table{
 // ----------------------
 
 #price{
+    margin-top: 70px;
+    padding: 0 100px;
     table{
-        margin-top: 20px;
-        width: 60%;
-        margin-bottom: 30px;
+        margin: 20px 0 60px;
+        width: 100%;
+        tr{
+            border-top: 1px solid #F0F0F0;
+        }
+        tr:first-child{
+            border-top: none;
+        }
+        td{
+            padding: 20px 0;
+        }
         th,td{
             text-align: left;
         }
@@ -373,6 +431,7 @@ table{
         border: 1px solid black;
         border-radius: 15px;
         padding: 5px 20px;
+        transition: all 0.3s;
     }
     a:hover{
         background-color: black;
@@ -385,25 +444,44 @@ table{
         input{
             display: none;
         }
-        .display-value{
-            display: block;
-        }
-        .update-value{
-            display: none;
-        }
     }
     .value-edit{
         b{
             display: none;
         }
         input{
-            display: block;
+            display: inline-block;
         }
-        .display-value{
-            display: none;
+    }
+    .edit-controls{
+        text-align: right;
+        &.value-display{
+            b{
+                display: block;
+            }
+            input{
+                display: none;
+            }
+            .display-value{
+                display: inline-block;
+            }
+            .update-value{
+                display: none;
+            }
         }
-        .update-value{
-            display: block;
+        &.value-edit{
+            b{
+                display: none;
+            }
+            input{
+                display: inline-block;
+            }
+            .display-value{
+                display: none;
+            }
+            .update-value{
+                display: inline-block;
+            }
         }
     }
     .add-button{
@@ -421,6 +499,7 @@ table{
 }
 
 #report{
+    margin-top: 70px;
     .date-range{
         display: inline-block;
         input{
@@ -455,6 +534,7 @@ table{
 }
 
 #item{
+    margin-top: 70px;
     a{
         color: black;
         text-decoration: none;

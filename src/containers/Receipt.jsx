@@ -13,13 +13,15 @@ class Receipt extends Component{
             item: "",
             orders: [],
             showSummary: "hide",
-            loggedIn: UserSession.getLoggedID()
+            loggedIn: UserSession.getLoggedID(),
+            chosenItemQuantity: 1
         };
         this.order = [];
         this.getCustomers = this.getCustomers.bind(this);
         this.chooseCustomer = this.chooseCustomer.bind(this);
         this.chooseItem = this.chooseItem.bind(this);
         this.submitOrder = this.submitOrder.bind(this);
+        this.changeQuantity = this.changeQuantity.bind(this);
         this.getCustomers();
     }
 
@@ -50,9 +52,10 @@ class Receipt extends Component{
         this.setState({
             customer: this.refs.chosenCustomer.value,
             item: "",
-            orders: []
+            orders: [],
+            chosenItemQuantity: 1
         });
-        this.refs.itemQuantity.value = "";
+        // this.refs.itemQuantity.value = "";
     }
 
     chooseItem(){
@@ -72,7 +75,8 @@ class Receipt extends Component{
         let orders = this.state.orders;
 
         let item = this.refs.itemValue.value;
-        let quantity = this.refs.itemQuantity.value;
+        // let quantity = this.refs.itemQuantity.value;
+        let quantity = this.state.chosenItemQuantity;
         let unit = this.refs.itemUnit.value;
         let price = customerDetails.price[item][unit].price;
         let itemID = customerDetails.price[item][unit].id;
@@ -89,14 +93,24 @@ class Receipt extends Component{
         });
         this.setState({
             orders: orders,
-            showSummary: "show"
+            showSummary: "show",
+            chosenItemQuantity: 1
         });
         this.refs.itemValue.value = "";
-        this.refs.itemQuantity.value = "";
+        // this.refs.itemQuantity.value = "";
         this.refs.itemUnit.value = "";
     }
 
+    changeQuantity(val){
+        if(val >= 1){
+            this.setState({
+                chosenItemQuantity: val
+            });
+        }
+    }
+
     render(){
+        const itemQuantity = this.state.chosenItemQuantity;
         const allCustomers = this.state.allCustomers.length ? this.state.allCustomers : [];
         const chosenCustomer = this.state.customer;
         const chosenItem = this.state.item;
@@ -132,7 +146,7 @@ class Receipt extends Component{
         });
         return(
             <div id="receipt" className="row center-container">
-                <div className="column">
+                <div className="column order-form">
                     <h2>Create Order</h2>
                     <div className="row align-center customer-container">
                         <h3>Customer: </h3>
@@ -152,7 +166,7 @@ class Receipt extends Component{
                             </div>
                             <div className="form-item">
                                 Quantity:
-                                <input type="number" ref="itemQuantity" placeholder="0"/>
+                                <input type="number" value={itemQuantity} placeholder="1" onChange={(e) => this.changeQuantity(e.target.value)}/>
                             </div>
                             <div className="form-item">
                                 Unit:
@@ -165,7 +179,7 @@ class Receipt extends Component{
                     </div>
                 </div>
                 <div className={"order-display "+showSummary}>
-                    <h2>{chosenCustomer}</h2>
+                    <h2>Order Summary for: {chosenCustomer}</h2>
                     <table>
                         <thead>
                             <tr>
