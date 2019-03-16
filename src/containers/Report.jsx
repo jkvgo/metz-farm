@@ -18,33 +18,9 @@ class Report extends Component{
         	startDate: new Date(),
         	endDate: new Date(),
         	receipts: [],
-            hideButton: ""
+            hideButton: "",
+            hideDownload: "hide"
         };
-        this.receipts = [
-        	{ 
-        		receiptID: "DR00001", 
-        		customer: "JK", 
-        		orders: [ 
-        			{item: "XL", quantity: 2, unit: "Case", price: 250, total: 500 },
-        			{item: "L", quantity: 3, unit: "Tray", price: 400, total: 1200 }
-        		]
-        	},
-        	{ 
-        		receiptID: "DR00021", 
-        		customer: "Metz", 
-        		orders:[ 
-        			{ item: "Jumbo", quantity: 10, unit: "Tray", price: 1000, total: 10000 }
-        		]
-        	},
-        	{ 
-        		receiptID: "DR01341", 
-        		customer: "Dom", 
-        		orders: [
-        			{item: "M", quantity: 25, unit: "Case", price: 12500, total: 123123123},
-        			{item: "Jumbo", quantity: 50, unit: "Tray", price: 200, total: 10000}
-        		]
-        	 }
-        ];
         this.setStartDate = this.setStartDate.bind(this);
         this.setEndDate = this.setEndDate.bind(this);
         this.generateReport = this.generateReport.bind(this);
@@ -71,13 +47,13 @@ class Report extends Component{
             endDate: endDate
         };
         axios.post('http://localhost:3001/report', range).then((res) => {
-            this.setState({
-                receipts: res.data
-            });
+            if(res.data.length > 0){
+                this.setState({
+                    receipts: res.data,
+                    hideDownload: ""
+                });
+            }
         });
-    	// this.setState({
-    	// 	receipts: this.receipts
-    	// });
     }
 
     downloadReport(){
@@ -85,21 +61,14 @@ class Report extends Component{
             hideButton: "hide"
         });
         const reportDiv = document.getElementById("report");
-        
         html2canvas(reportDiv).then((canvas) => {
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF();
-            pdf.addImage(imgData, 'PNG', 20, 20, 210, 0);
-            // pdf.addHTML(canvas, function(){
-                pdf.save('report.pdf');
-            // });
+            pdf.addImage(imgData, 'PNG', 10, 20, 210, 0);
+            pdf.save('report.pdf');
             this.setState({
                 hideButton: ""
             });
-            // const pdf = new jsPDF();
-            // pdf.addHtml(document.getElementById("report"), function(){
-            //     pdf.save('report.pdf');
-            // })
         });
     }
     
@@ -107,29 +76,46 @@ class Report extends Component{
     	const startDate = this.state.startDate;
     	const endDate = this.state.endDate;
         const hideButton = this.state.hideButton;
+        const hideDownload = this.state.hideDownload;
+        let grandTotal = 0;
+        let hide = "hide";
+        let reportGrandTotal = 0;
     	const receipts = this.state.receipts.length ? this.state.receipts.map((rec) => {
     		return(
 				rec.orders.map((ord, index) => {
 					if(index === 0){
+                        grandTotal = rec.orders[0].total;
+                        hide = "hide";
+                        if(rec.orders.length === index+1){
+                            hide = "";
+                            reportGrandTotal += grandTotal;
+                        }
 						return(
 							<tr key={rec.customer+index}>
-								<td rowSpan={rec.orders.length}>{rec.receiptID}</td>
-			    				<td rowSpan={rec.orders.length}>{rec.customer}</td>
+								<td rowSpan={rec.orders.length} valign="top">{rec.receiptID}</td>
+			    				<td rowSpan={rec.orders.length} valign="top">{rec.customer}</td>
 			    				<td>{rec.orders[0].item}</td>
 								<td>{rec.orders[0].quantity}</td>
 								<td>{rec.orders[0].unit}</td>
 								<td>{rec.orders[0].price}</td>
 								<td>{rec.orders[0].total}</td>
+                                <td className={hide}><b>{grandTotal}</b></td>
 		    				</tr>
 						)
 					}else{
+                        grandTotal += ord.total;
+                        if(rec.orders.length === index+1){
+                            hide = "";
+                            reportGrandTotal += grandTotal;
+                        }
 						return(
-							<tr key={rec.customer+index}>
+							<tr key={rec.customer+index} className="no-border">
 								<td>{ord.item}</td>
 								<td>{ord.quantity}</td>
 								<td>{ord.unit}</td>
 								<td>{ord.price}</td>
 								<td>{ord.total}</td>
+                                <td className={hide}><b>{grandTotal}</b></td>
 							</tr>
 						)
 					}
@@ -153,20 +139,33 @@ class Report extends Component{
             	<table>
             		<thead>
             			<tr>
-            				<th></th>
+            				<th>Order No.</th>
             				<th>Customer</th>
             				<th>Item</th>
             				<th>Qty</th>
             				<th>Unit</th>
             				<th>Price per Unit</th>
             				<th>Total Price</th>
+                            <th>Grand Total</th>
             			</tr>
             		</thead>
             		<tbody>
             			{receipts}
             		</tbody>
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><b>Report Total:</b></td>
+                            <td><b>{reportGrandTotal}</b></td>
+                        </tr>
+                    </tfoot>
             	</table>
-                <button type="button" className="download-button" onClick={() => this.downloadReport()}>Download</button>
+                <button type="button" className={"download-button " + hideDownload} onClick={() => this.downloadReport()}>Download</button>
             </div>
         );
     }

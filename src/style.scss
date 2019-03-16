@@ -128,8 +128,11 @@ button:active{
 table{
     border-collapse: collapse;
     tbody{
+        tr{
+            transition: all 0.3s;
+        }
         tr:hover{
-            background-color: #DEDEDE;
+            background-color: #F0F0F0;
         }
     }
 }
@@ -286,6 +289,7 @@ table{
     }
     .customer-item:first-child{
         margin-top: 30px;
+        border-top: none;
     }
     .customer-item{
         margin: 0 100px;
@@ -513,7 +517,8 @@ table{
     button{
         float: unset;
         padding: 3px 10px;
-        border-radius: 10px;
+        font-size: 16px;
+        border-radius: 5px;
         margin-left: 20px;
         &.hide{
             display: none;
@@ -523,6 +528,29 @@ table{
         thead{
             th{
                 text-align: left;
+            }
+        }
+        tbody{
+            tr{
+                border-top: 1px solid #F0F0F0;
+                &.no-border{
+                    border-top: none;
+                }
+                td{
+                    padding: 5px 0;
+                    &.hide{
+                        opacity: 0;
+                    }
+                }
+            }
+            tr:first-child{
+                border-top: none;
+                margin-top: 0;
+            }
+        }
+        tfoot{
+            td{
+                padding-top: 40px;
             }
         }
         margin-top: 30px;
