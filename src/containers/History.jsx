@@ -15,48 +15,6 @@ class History extends Component{
 			historyMapping: [],
 			itemUnits: []
 		};
-		this.history = [
-            {
-            	cust_id: 0,
-            	item: "XL",
-            	unit: "Case",
-            	price: 200,
-            	modified: "2019-01-20",
-            	modified_by: "JK"
-            },
-            {
-            	cust_id: 0,
-            	item: "XL",
-            	unit: "Tray",
-            	price: 180,
-            	modified: "2019-01-22",
-            	modified_by: "JK"
-            },
-            {
-            	cust_id: 0,
-            	item: "L",
-            	unit: "Case",
-            	price: 140,
-            	modified: "2019-01-25",
-            	modified_by: "Gara"
-            },
-            {
-            	cust_id: 0,
-            	item: "L",
-            	unit: "Tray",
-            	price: 150,
-            	modified: "2019-01-29",
-            	modified_by: "JK"
-            },
-            {
-            	cust_id: 0,
-            	item: "M",
-            	unit: "Case",
-            	price: 120,
-            	modified: "2019-02-04",
-            	modified_by: "Metz"
-            }
-        ];
         this.mapHistory = this.mapHistory.bind(this);
         this.getItems = this.getItems.bind(this);
         this.mapHistory();
@@ -81,7 +39,7 @@ class History extends Component{
 
 	mapHistory(){
 		let itemUnits = [], customerName;
-		axios.get('http://localhost:3001/history/' + this.customerID).then((res) => {
+		axios.get('http://localhost:3000/history/' + this.customerID).then((res) => {
 			itemUnits = this.getItems(res.data);
 			customerName = res.data.length ? res.data[0].name : "There is no history yet for this customer";
 			let historyMapping = [];

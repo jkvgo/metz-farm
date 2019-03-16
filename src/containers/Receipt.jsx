@@ -27,7 +27,7 @@ class Receipt extends Component{
 
     submitOrder(){
         const orders = this.state.orders;
-        axios.post("http://localhost:3001/orders", orders).then((res) => {
+        axios.post("orders", orders).then((res) => {
             if(res.status === 200){
                 alert(res.data);
                 this.getCustomers();
@@ -38,7 +38,7 @@ class Receipt extends Component{
     }
 
     getCustomers(){
-        axios.get('http://localhost:3001/customers').then((res) => {
+        axios.get('customers').then((res) => {
             this.setState({
                 allCustomers: res.data,
                 customer: res.data[0].name,
@@ -75,30 +75,30 @@ class Receipt extends Component{
         let orders = this.state.orders;
 
         let item = this.refs.itemValue.value;
-        // let quantity = this.refs.itemQuantity.value;
         let quantity = this.state.chosenItemQuantity;
-        let unit = this.refs.itemUnit.value;
-        let price = customerDetails.price[item][unit].price;
-        let itemID = customerDetails.price[item][unit].id;
-        let totalPrice = price * quantity;
-        orders.push({
-            custID: customerDetails.id,
-            loggedIn: loggedIn,
-            item: item,
-            quantity: quantity,
-            unit: unit,
-            price: price,
-            totalPrice: totalPrice,
-            itemID: itemID
-        });
-        this.setState({
-            orders: orders,
-            showSummary: "show",
-            chosenItemQuantity: 1
-        });
-        this.refs.itemValue.value = "";
-        // this.refs.itemQuantity.value = "";
-        this.refs.itemUnit.value = "";
+        if(quantity > 0 && item !== ""){
+            let unit = this.refs.itemUnit.value;
+            let price = customerDetails.price[item][unit].price;
+            let itemID = customerDetails.price[item][unit].id;
+            let totalPrice = price * quantity;
+            orders.push({
+                custID: customerDetails.id,
+                loggedIn: loggedIn,
+                item: item,
+                quantity: quantity,
+                unit: unit,
+                price: price,
+                totalPrice: totalPrice,
+                itemID: itemID
+            });
+            this.setState({
+                orders: orders,
+                showSummary: "show",
+                chosenItemQuantity: 1
+            });
+            this.refs.itemValue.value = "";
+            this.refs.itemUnit.value = "";
+        }   
     }
 
     changeQuantity(val){

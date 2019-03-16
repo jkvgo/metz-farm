@@ -22,7 +22,7 @@ class Item extends Component{
 	}
 
 	getItems(){
-		axios.get('http://localhost:3001/items').then((res) => {
+		axios.get('items').then((res) => {
 			this.setState({
 				items: res.data,
 				addMode: false
@@ -69,7 +69,7 @@ class Item extends Component{
 			unit: newItemUnit,
 			loggedIn: loggedIn
 		};
-		axios.post('http://localhost:3001/item', newItem).then((res) => {
+		axios.post('item', newItem).then((res) => {
 			this.getItems();
 		}).catch((err) => {
 			alert("Unable to add item");

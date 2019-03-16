@@ -36,7 +36,7 @@ class Price extends Component{
 	}
 
 	getCustomer(){
-		axios.get('http://localhost:3001/customers/'+this.customerID).then((res) => {
+		axios.get('http://localhost:3000/customers/'+this.customerID).then((res) => {
             this.setState({
                 customer: res.data,
                 addMode: false,
@@ -51,7 +51,7 @@ class Price extends Component{
 	}
 
 	getItemsReference(){
-		axios.get('http://localhost:3001/items').then((res) => {
+		axios.get('http://localhost:3000/items').then((res) => {
 			this.setState({
 				itemsReference: res.data
 			});
@@ -135,7 +135,7 @@ class Price extends Component{
 				price: items[chosenItemIndex].value,
 				loggedIn: loggedIn
 			};
-			axios.post('http://localhost:3001/price', postBody).then((res) => {
+			axios.post('http://localhost:3000/price', postBody).then((res) => {
 				this.getCustomer();
 			}).catch((err) => {
 				alert("Unable to update prices");
@@ -206,7 +206,7 @@ class Price extends Component{
 				price: newItem.price,
 				loggedIn: this.state.loggedIn
 			};
-			axios.post('http://localhost:3001/addprice', submitItem).then((res) => {
+			axios.post('http://localhost:3000/addprice', submitItem).then((res) => {
 				this.getCustomer();
 			}).catch((err) => {
 				alert("Unable to add prices");

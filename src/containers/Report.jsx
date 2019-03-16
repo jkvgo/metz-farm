@@ -46,7 +46,7 @@ class Report extends Component{
             startDate: startDate,
             endDate: endDate
         };
-        axios.post('http://localhost:3001/report', range).then((res) => {
+        axios.post('report', range).then((res) => {
             if(res.data.length > 0){
                 this.setState({
                     receipts: res.data,

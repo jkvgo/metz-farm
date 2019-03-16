@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3").verbose();
 var path = require("path");
 
-const port = 3001;
+const port = 3000;
 const app = express();
 app.use(bodyParser.json());
 app.use(express.static('build'));
@@ -25,13 +25,6 @@ let db = new sqlite3.Database("./db/farm.db", sqlite3.OPEN_READWRITE, (err) => {
 // 	console.log('Close the database connection.');
 // });
 
-app.get("/", (req,res) => {
-	res.sendFile(path.join(__dirname, 'build/index.html'), (err) => {
-		if(err){
-			res.status(500).send(err);
-		}
-	})
-});
 
 app.get("/history/:id", (req, res) => {
 	let id = req.params.id;
@@ -259,6 +252,14 @@ app.post("/item", (req, res) => {
 		res.status(200).send();
 		console.log("Added new item successfully");
 	});
+});
+
+app.get("/*", (req,res) => {
+	res.sendFile(path.join(__dirname, 'build/index.html'), (err) => {
+		if(err){
+			res.status(500).send(err);
+		}
+	})
 });
 
 app.listen(port, '0.0.0.0', function(){

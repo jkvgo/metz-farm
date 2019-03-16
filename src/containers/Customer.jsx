@@ -23,7 +23,7 @@ class Customer extends Component{
     }
 
     getCustomers(){
-        axios.get('http://localhost:3001/customers').then((res) => {
+        axios.get('customers').then((res) => {
             this.setState({
                 allCustomers: res.data
             });
@@ -69,7 +69,7 @@ class Customer extends Component{
         };
         let agree = confirm("Are you sure you want to create this new customer?");
         if(agree == true){
-            axios.post('http://localhost:3001/customers', customerDetails).then((res) => {
+            axios.post('customers', customerDetails).then((res) => {
                 this.getCustomers();
                 this.setState({
                     editMode: false

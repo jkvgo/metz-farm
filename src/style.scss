@@ -319,6 +319,11 @@ table{
     }
     .edit-controls{
         margin: 30px 100px 0;
+        button{
+            font-size: 16px;
+            margin-left: 10px;
+            border-radius: 5px;
+        }
         &.false{
             .add-button{
                 display: block;
