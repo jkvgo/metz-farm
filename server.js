@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3").verbose();
+const { createLogger, format, transports } = require("winston");
 var path = require("path");
 
 const port = 3000;
@@ -9,6 +10,28 @@ const app = express();
 app.use(bodyParser.json());
 app.use(express.static('build'));
 app.use(cors());
+
+//for logging purposes
+const logger = createLogger({
+	level: 'info',
+	format: format.combine(
+		format.timestamp({
+		  format: 'YYYY-MM-DD HH:mm:ss'
+		}),
+		format.errors({ stack: true }),
+		format.splat(),
+		format.json()
+	),
+	defaultMeta: { service: 'your-service-name' },
+	transports: [
+		//
+		// - Write to all logs with level `info` and below to `combined.log`
+		// - Write all logs error (and below) to `error.log`.
+		//
+		// new transports.File({ filename: 'quick-start-error.log', level: 'error' }),
+		new transports.File({ filename: 'all.log' })
+	]
+})
 
 let db = new sqlite3.Database("./db/farm.db", sqlite3.OPEN_READWRITE, (err) => {
 	if(err){
@@ -35,6 +58,7 @@ app.get("/history/:id", (req, res) => {
 			results.push(row);
 		}, (err) => {
 			res.status(err ? 500:200).json(err || results);
+			logger.info('Found error when trying to retrieve customer history: %s', err);
 		});
 	});
 });
@@ -64,6 +88,7 @@ app.get("/customers/:id", (req, res) => {
 	 			});
  			}
  			res.status(err ? 500:200).json(err || customerPrice);
+ 			logger.info('Found error when trying to retrieve customer details and prices: %s', err);
  		});
  	});
 });
@@ -75,6 +100,7 @@ app.get("/items", (req,res) => {
 		items.push(row);
 	}, (err) => {
 		res.status(err ? 500:200).json(err || items);
+		logger.info('Found error when trying to retrieve items: %s', err);
 	})
 });
 
@@ -110,6 +136,10 @@ app.get("/customers", (req,res) => {
 				return allCust;
 			}, []);
 			res.status(err ? 500:200).json(err || mappedCustomers);
+			if(err){
+				logger.info('Found error when trying to retrieve customers and details: %s', err);	
+			}
+			
 		});
 	})
 });
@@ -143,6 +173,10 @@ app.post('/report', (req, res) => {
 				}
 			});
 			res.status(err ? 500:200).json(err || mappedReceipts);
+			if(err){
+				logger.info('Found error when trying to generate report: %s', err);	
+			}
+			
 		});
 	});
 });
@@ -152,21 +186,24 @@ app.post("/customers", (req, res) => {
 	let sql = `INSERT INTO customers(name,modified) VALUES(?,?)`;
 	db.run(sql, [customer.name, customer.modified], function(err){
 		if(err){
-			return console.error(err.message);
 			res.status(500).json(err);
+			logger.info('Found error when trying to insert into customers table: %s', err);
+			return console.error(err.message);
 		}
 		console.log("Inserted Customers successfully");
 		let customerID = this.lastID;
+		logger.info('User %s created new customer: %s', customer.modified, customer.name);
 		let sqlPrice = `INSERT INTO customer_price(cust_id,item_id,price,modified) VALUES (?,?,?,?)`;
 		db.run(sqlPrice, [customerID, 1, 0, customer.modified], function(err2){
 			if(err2){
 				return console.error("Error on inserting to customer_price table: " + err2.message);
-				res.status(500).json(err);	
+				res.status(500).json(err2);
+				logger.info('Found error when trying to insert into customer price: %s', err2);
 			}
 			res.status(200).send();
 			console.log("New customer default price inserted successfully");
-		})
-	})
+		});
+	});
 });
 
 app.post("/orders", (req, res) => {
@@ -176,17 +213,23 @@ app.post("/orders", (req, res) => {
 	const loggedIn = orders[0].loggedIn;
 	let rowID;
 	let sql = `INSERT INTO orders(cust_id,created_by) VALUES(?,?)`;
-	// let bulkPlaceholders = orders.map((ord) => '(?)').join(',');
 	let sqlBulk;
 	db.run(sql, [customerID, loggedIn], function(err){
-		if(err) res.status(500).json(err);
+		if(err){
+			res.status(500).json(err);
+			logger.info('Found error when trying to insert into orders: %s', err2);
+		}
 		rowID = this.lastID;
+		logger.info('User %s created new order: %s', loggedIn, rowID);
 		let bulkPlaceholders = orders.map((ord) => {
 			return `(${rowID},${ord.itemID},${ord.quantity},${ord.price},${ord.totalPrice})`
 		});
 		sqlBulk = `INSERT INTO order_details(order_id, item_id, quantity, unit_price, price) VALUES ` + bulkPlaceholders;
 		db.run(sqlBulk, function(err2){
-			if(err2) res.status(500).json(err);
+			if(err2){
+				res.status(500).json(err);
+				logger.info('Found error when trying to insert into order details: %s', err2);
+			}
 			res.status(err ? 500:200).json(err || "Order submitted successfully");
 		});
 	})
@@ -201,6 +244,7 @@ app.post("/verify", (req,res) => {
 	db.serialize(() => {
 		db.each(sql, [credentials.username, credentials.password], (err, row) => {
 			res.status(err ? 500:200).json(err || row);
+			logger.info('User %s logged in', row.id);
 		});
 	});
 });
@@ -210,16 +254,19 @@ app.post("/price", (req,res) => {
 	let sql = `UPDATE customer_price SET price = ${customerPrice.price} WHERE cust_id = ${customerPrice.customer} AND item_id = ${customerPrice.item}`;
 	db.run(sql, function(err){
 		if(err){
-			return console.error("Error on updating customer price: " + err);
 			res.status(500).send();
+			logger.info('Found error when trying to update customer price: %s', err2);
+			return console.error("Error on updating customer price: " + err);
 		}
 		console.log(`Customer price updated ${this.changes}`);
+		logger.info('User %s updated customer: %s with price %s', customerPrice.loggedIn, customerPrice.customer, customerPrice.price);
 
 		// Update customer price history table after price-update
 		let priceHistory = `(${customerPrice.customer}, ${customerPrice.item}, ${customerPrice.price}, ${customerPrice.loggedIn})`;
 		let sqlBulk = `INSERT INTO customer_history(cust_id, item_id, price, modified_by) VALUES ` + priceHistory;
 		db.run(sqlBulk, function(err2){
 			if(err2){
+				logger.info('Found error when trying to insert into customer history: %s', err2);
 				return console.error("Error on updating customer history: " + err2);
 			}
 			console.log(`Customer history inserted ${this.changes}`);
@@ -233,10 +280,12 @@ app.post("/addprice", (req,res) => {
 	let sql = `INSERT INTO customer_price(cust_id,item_id,price,modified) VALUES(?,?,?,?)`;
 	db.run(sql, [newItem.cust_id, newItem.item_id, newItem.price, newItem.loggedIn], function(err){
 		if(err){
+			res.status(500).json(err);
+			logger.info('Found error when trying to insert into customer price: %s', err);
 			return console.error("Error on inserting to customer_price table: " + err.message);
-			res.status(500).json(err);	
 		}
 		res.status(200).send();
+		logger.info('User %s added new price: %s for customer: %s', newItem.loggedIn, newItem.price, newItem.cust_id);
 		console.log("Added new customer price successfully");
 	});
 });
@@ -246,11 +295,13 @@ app.post("/item", (req, res) => {
 	let sql = `INSERT INTO items(item,unit,modified) VALUES(?,?,?)`;
 	db.run(sql, [newItem.item, newItem.unit, newItem.loggedIn], function(err){
 		if(err){
-			return console.error("Error on inserting new item: " + err.message);
 			res.status(500).json(err);
+			logger.info('Found error when trying to insert into items: %s', err);
+			return console.error("Error on inserting new item: " + err.message);
 		}
 		res.status(200).send();
 		console.log("Added new item successfully");
+		logger.info('User %s added new item: %s', newItem.loggedIn, newItem.item);
 	});
 });
 
