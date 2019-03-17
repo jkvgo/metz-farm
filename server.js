@@ -57,8 +57,8 @@ app.get("/history/:id", (req, res) => {
 		db.each(sql, (err, row) => {
 			results.push(row);
 		}, (err) => {
-			res.status(err ? 500:200).json(err || results);
 			logger.info('Found error when trying to retrieve customer history: %s', err);
+			res.status(err ? 500:200).json(err || results);
 		});
 	});
 });
@@ -87,8 +87,8 @@ app.get("/customers/:id", (req, res) => {
 	 				}
 	 			});
  			}
- 			res.status(err ? 500:200).json(err || customerPrice);
  			logger.info('Found error when trying to retrieve customer details and prices: %s', err);
+ 			res.status(err ? 500:200).json(err || customerPrice);
  		});
  	});
 });
@@ -99,8 +99,8 @@ app.get("/items", (req,res) => {
 	db.each(sql, (err,row) => {
 		items.push(row);
 	}, (err) => {
-		res.status(err ? 500:200).json(err || items);
 		logger.info('Found error when trying to retrieve items: %s', err);
+		res.status(err ? 500:200).json(err || items);
 	})
 });
 
@@ -135,11 +135,10 @@ app.get("/customers", (req,res) => {
 				}
 				return allCust;
 			}, []);
-			res.status(err ? 500:200).json(err || mappedCustomers);
 			if(err){
 				logger.info('Found error when trying to retrieve customers and details: %s', err);	
 			}
-			
+			res.status(err ? 500:200).json(err || mappedCustomers);
 		});
 	})
 });
@@ -172,11 +171,10 @@ app.post('/report', (req, res) => {
 					currOrder = ord.id;
 				}
 			});
-			res.status(err ? 500:200).json(err || mappedReceipts);
 			if(err){
 				logger.info('Found error when trying to generate report: %s', err);	
 			}
-			
+			res.status(err ? 500:200).json(err || mappedReceipts);
 		});
 	});
 });
@@ -186,9 +184,9 @@ app.post("/customers", (req, res) => {
 	let sql = `INSERT INTO customers(name,modified) VALUES(?,?)`;
 	db.run(sql, [customer.name, customer.modified], function(err){
 		if(err){
-			res.status(500).json(err);
 			logger.info('Found error when trying to insert into customers table: %s', err);
 			return console.error(err.message);
+			res.status(500).json(err);
 		}
 		console.log("Inserted Customers successfully");
 		let customerID = this.lastID;
@@ -197,11 +195,11 @@ app.post("/customers", (req, res) => {
 		db.run(sqlPrice, [customerID, 1, 0, customer.modified], function(err2){
 			if(err2){
 				return console.error("Error on inserting to customer_price table: " + err2.message);
-				res.status(500).json(err2);
 				logger.info('Found error when trying to insert into customer price: %s', err2);
+				res.status(500).json(err2);
 			}
-			res.status(200).send();
 			console.log("New customer default price inserted successfully");
+			res.status(200).send();
 		});
 	});
 });
@@ -216,8 +214,8 @@ app.post("/orders", (req, res) => {
 	let sqlBulk;
 	db.run(sql, [customerID, loggedIn], function(err){
 		if(err){
-			res.status(500).json(err);
 			logger.info('Found error when trying to insert into orders: %s', err2);
+			res.status(500).json(err);
 		}
 		rowID = this.lastID;
 		logger.info('User %s created new order: %s', loggedIn, rowID);
@@ -227,8 +225,8 @@ app.post("/orders", (req, res) => {
 		sqlBulk = `INSERT INTO order_details(order_id, item_id, quantity, unit_price, price) VALUES ` + bulkPlaceholders;
 		db.run(sqlBulk, function(err2){
 			if(err2){
-				res.status(500).json(err);
 				logger.info('Found error when trying to insert into order details: %s', err2);
+				res.status(500).json(err);
 			}
 			res.status(err ? 500:200).json(err || "Order submitted successfully");
 		});
@@ -243,8 +241,14 @@ app.post("/verify", (req,res) => {
 	let sql = `SELECT * FROM users WHERE name = ? AND password = ?`;
 	db.serialize(() => {
 		db.each(sql, [credentials.username, credentials.password], (err, row) => {
-			res.status(err ? 500:200).json(err || row);
+			verified = true;
+		}, (err, row) => {
 			logger.info('User %s logged in', row.id);
+			if(!verified){
+				res.status(500).send();
+			}else{
+				res.status(err ? 500:200).json(err || row);
+			}
 		});
 	});
 });
@@ -254,9 +258,9 @@ app.post("/price", (req,res) => {
 	let sql = `UPDATE customer_price SET price = ${customerPrice.price} WHERE cust_id = ${customerPrice.customer} AND item_id = ${customerPrice.item}`;
 	db.run(sql, function(err){
 		if(err){
-			res.status(500).send();
 			logger.info('Found error when trying to update customer price: %s', err2);
 			return console.error("Error on updating customer price: " + err);
+			res.status(500).send();
 		}
 		console.log(`Customer price updated ${this.changes}`);
 		logger.info('User %s updated customer: %s with price %s', customerPrice.loggedIn, customerPrice.customer, customerPrice.price);
@@ -280,13 +284,13 @@ app.post("/addprice", (req,res) => {
 	let sql = `INSERT INTO customer_price(cust_id,item_id,price,modified) VALUES(?,?,?,?)`;
 	db.run(sql, [newItem.cust_id, newItem.item_id, newItem.price, newItem.loggedIn], function(err){
 		if(err){
-			res.status(500).json(err);
 			logger.info('Found error when trying to insert into customer price: %s', err);
 			return console.error("Error on inserting to customer_price table: " + err.message);
+			res.status(500).json(err);
 		}
-		res.status(200).send();
 		logger.info('User %s added new price: %s for customer: %s', newItem.loggedIn, newItem.price, newItem.cust_id);
 		console.log("Added new customer price successfully");
+		res.status(200).send();
 	});
 });
 
@@ -295,13 +299,13 @@ app.post("/item", (req, res) => {
 	let sql = `INSERT INTO items(item,unit,modified) VALUES(?,?,?)`;
 	db.run(sql, [newItem.item, newItem.unit, newItem.loggedIn], function(err){
 		if(err){
-			res.status(500).json(err);
 			logger.info('Found error when trying to insert into items: %s', err);
 			return console.error("Error on inserting new item: " + err.message);
+			res.status(500).json(err);
 		}
-		res.status(200).send();
 		console.log("Added new item successfully");
 		logger.info('User %s added new item: %s', newItem.loggedIn, newItem.item);
+		res.status(200).send();
 	});
 });
 

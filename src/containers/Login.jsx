@@ -39,7 +39,7 @@ class Login extends Component{
 				alert("User not found");
 			}
 		}).catch((err) => {
-			console.error("Unable to Login");
+			alert("User not found");
 		});
 	}
 
