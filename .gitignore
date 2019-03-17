@@ -11,4 +11,7 @@ node_modules
 .npm
 
 # Prod Bundle
-build
+# build
+
+#package lock file
+package-lock.json
