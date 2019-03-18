@@ -355,8 +355,9 @@ table{
 #users{
     margin-top: 70px;
     button{
-        color: #ffffff;
+        color: #000000;
         text-decoration: none;
+        background: transparent;
         border: 1px solid black;
         border-radius: 15px;
         padding: 5px 15px;
@@ -364,8 +365,8 @@ table{
         transition: all 0.3s;
     }
     button:hover{
-        background-color: black;
-        color: white;
+        color: #ffffff;
+        background-color: #000000;
     }
     button:active{
         background-color: #2A2A2A;
@@ -391,6 +392,11 @@ table{
             font-size: 16px;
             margin-left: 10px;
             border-radius: 5px;
+            color: #ffffff;
+            background-color: #000000;
+        }
+        button:hover{
+            background-color: #3F3F3F;
         }
         &.false{
             .add-button{
