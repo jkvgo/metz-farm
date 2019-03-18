@@ -7,6 +7,7 @@ import Price from './containers/Price';
 import History from './containers/History';
 import Login from './containers/Login';
 import Item from './containers/Item';
+import User from './containers/User';
 
 import UserSession from './UserSession';
 
@@ -43,6 +44,7 @@ const Routes = () => (
                 <Route path="/customer" exact component={Customer}/>
                 <Route path="/report" exact component={Report}/>
                 <Route path="/item" exact component={Item}/>
+                <Route path="/user" exact component={User}/>
                 <Route exact path="/customer/price/:id" component={Price}/>
                 <Route exact path="/customer/history/:id" component={History}/>
                 <Route component={Receipt}/>

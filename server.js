@@ -23,7 +23,7 @@ const logger = createLogger({
 		format.splat(),
 		format.json()
 	),
-	defaultMeta: { service: 'your-service-name' },
+	defaultMeta: { service: 'farm-logging-service' },
 	transports: [
 		//
 		// - Write to all logs with level `info` and below to `combined.log`
@@ -91,6 +91,17 @@ app.get("/customers/:id", (req, res) => {
  			res.status(err ? 500:200).json(err || customerPrice);
  		});
  	});
+});
+
+app.get("/users", (req,res) => {
+	let sql = `select id, name, created_on from users`;
+	let items = [];
+	db.each(sql, (err,row) => {
+		items.push(row);
+	}, (err) => {
+		logger.info('Found error when trying to retrieve users: %s', err);
+		res.status(err ? 500:200).json(err || items);
+	})
 });
 
 app.get("/items", (req,res) => {
@@ -176,6 +187,21 @@ app.post('/report', (req, res) => {
 			}
 			res.status(err ? 500:200).json(err || mappedReceipts);
 		});
+	});
+});
+
+app.post("/users", (req, res) => {
+	const user = req.body;
+	let sql = `INSERT INTO users(name,password) VALUES(?,?)`;
+	db.run(sql, [user.name, user.password], function(err){
+		if(err){
+			logger.info('Found error when trying to insert into users table: %s', err);
+			return console.error(err.message);
+			res.status(500).json(err);
+		}
+		console.log("Inserted User successfully");
+		logger.info('New user created: %s', user.name);
+		res.status(200).send();
 	});
 });
 

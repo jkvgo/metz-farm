@@ -349,6 +349,68 @@ table{
     // }
 }
 
+// CUSTOMER ----------------
+// -------------------------
+
+#users{
+    margin-top: 70px;
+    button{
+        color: #ffffff;
+        text-decoration: none;
+        border: 1px solid black;
+        border-radius: 15px;
+        padding: 5px 15px;
+        margin-left: 20px;
+        transition: all 0.3s;
+    }
+    button:hover{
+        background-color: black;
+        color: white;
+    }
+    button:active{
+        background-color: #2A2A2A;
+    }
+    .user-item{
+        margin: 0 100px;
+        padding: 10px 0;
+        border-top: 1px solid #F0F0F0;
+        p{
+            margin: 0 30px 0 0;
+        }
+        b{
+            flex-grow: 1;
+        }
+    }
+    .user-item:first-child{
+        margin-top: 30px;
+        border-top: none;
+    }
+    .edit-controls{
+        margin: 30px 100px 0;
+        button{
+            font-size: 16px;
+            margin-left: 10px;
+            border-radius: 5px;
+        }
+        &.false{
+            .add-button{
+                display: block;
+            }
+            .submit-button,.cancel-button{
+                display: none;
+            }
+        }
+        &.true{
+            .add-button{
+                display: none;
+            }
+            .submit-button,.cancel-button{
+                display: block;
+            }
+        }
+    }
+}
+
 // HISTORY ----------------
 // ------------------------
 
