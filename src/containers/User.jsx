@@ -4,6 +4,7 @@ import axios from 'axios';
 
 class User extends Component{
 	constructor(){
+		UserSession.redirectToLogin();
 		super();
 		this.state = {
 			users: [],
@@ -12,7 +13,7 @@ class User extends Component{
 			editMode: false
 		};
 		this.getAllUsers = this.getAllUsers.bind(this);
-		this.deleteItem = this.deleteItem.bind(this);
+		this.deleteUser = this.deleteUser.bind(this);
 		this.typeUser = this.typeUser.bind(this);
 		this.typePassword = this.typePassword.bind(this);
 		this.addUser = this.addUser.bind(this);
@@ -40,8 +41,13 @@ class User extends Component{
 		});
 	}
 
-	deleteItem(id){
-		alert("Are you sure you want to delete item");
+	deleteUser(id){
+		let agree = confirm("Are you sure you want to delete this user?");
+		if(agree === true){
+			axios.delete("users/"+id).then((res) => {
+				this.getAllUsers();
+			});	
+		}
 	}
 
 	typeUser(val){
@@ -101,7 +107,7 @@ class User extends Component{
 					<div className={"row user-item just-between align-center"} key={key}>
 	                    <p>{key+1}</p>
 	                    <b className="user-name">{u.name}</b>
-	                    <button type="button" className="delete-btn" onClick={() => this.deleteItem(u.id) }>Delete</button>
+	                    <button type="button" className="delete-btn" onClick={() => this.deleteUser(u.id) }>Delete</button>
 	                </div>
 				)
 			}

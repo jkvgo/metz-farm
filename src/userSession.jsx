@@ -12,7 +12,7 @@ var UserSession = (function(){
 
 	var setLoggedIn = function(user){
 		cookies.set('loggedIn', true);
-		cookies.set('userID', user.id);
+		cookies.set('userID', user);
 	}
 
 	var setLoggedOut = function(){

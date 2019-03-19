@@ -30,9 +30,13 @@ class Item extends Component{
 		})
 	}
 
-	deleteItem(){
+	deleteItem(e,id){
+		e.preventDefault();
 		let agree = confirm("Are you sure you want to delete this item?");
 		if(agree){
+			axios.delete("items/"+id).then((res) => {
+				this.getItems();
+			});
 		}
 	}
 
@@ -110,6 +114,7 @@ class Item extends Component{
 						<p>{key+1}</p>
 						<b className="item-name">{i.item}</b>
 						<p className="item-unit">{i.unit}</p>
+						<a href="#" onClick={(e) => this.deleteItem(e, i.id)}>Delete Item</a>
 					</div>
 				)
 			}

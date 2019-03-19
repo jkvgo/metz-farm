@@ -17,6 +17,7 @@ class Customer extends Component{
         this.customers = [];
         this.getCustomers = this.getCustomers.bind(this);
         this.addCustomer = this.addCustomer.bind(this);
+        this.deleteCustomer = this.deleteCustomer.bind(this);
         this.submitCustomer = this.submitCustomer.bind(this);
         this.cancelEdit = this.cancelEdit.bind(this);
         this.getCustomers();
@@ -41,6 +42,16 @@ class Customer extends Component{
             allCustomers: allCustomers,
             editMode: true
         });
+    }
+
+    deleteCustomer(e,id){
+        e.preventDefault();
+        let agree = confirm("Are you sure you want to delete this customer?");
+        if(agree === true){
+            axios.delete("customers/"+id).then((res) => {
+                this.getCustomers();
+            });
+        }
     }
 
     cancelEdit(){
@@ -93,6 +104,7 @@ class Customer extends Component{
                     <b className="customer-name">{cust.name}</b>
                     <Link to={`${currentPath}/price/${cust.id}`}>View Prices</Link>
                     <Link to={`${currentPath}/history/${cust.id}`}>View History</Link>
+                    <a href="#" onClick={(e) => this.deleteCustomer(e,cust.id)}>Delete Customer</a>
                 </div>
             );
         });

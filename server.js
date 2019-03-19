@@ -52,7 +52,7 @@ let db = new sqlite3.Database("./db/farm.db", sqlite3.OPEN_READWRITE, (err) => {
 app.get("/history/:id", (req, res) => {
 	let id = req.params.id;
 	let results = [];
-	let sql = `select ch.cust_id, c.name, i.item, i.unit, ch.price, ch.modified, ch.modified_by, u.name as 'modified_name' from customers c, customer_history ch, items i, users u where c.id = ch.cust_id and ch.item_id = i.id and ch.modified_by = u.id and ch.cust_id = ${id}`;
+	let sql = `select ch.cust_id, c.name, i.item, i.unit, ch.price, ch.modified, ch.modified_by, u.name as 'modified_name' from customers c, customer_history ch, items i, users u where c.id = ch.cust_id and ch.item_id = i.id and ch.modified_by = u.id and c.deleted = 0 and i.deleted = 0 and ch.cust_id = ${id}`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			results.push(row);
@@ -94,7 +94,7 @@ app.get("/customers/:id", (req, res) => {
 });
 
 app.get("/users", (req,res) => {
-	let sql = `select id, name, created_on from users`;
+	let sql = `select id, name, created_on from users where deleted = 0`;
 	let items = [];
 	db.each(sql, (err,row) => {
 		items.push(row);
@@ -105,7 +105,7 @@ app.get("/users", (req,res) => {
 });
 
 app.get("/items", (req,res) => {
-	let sql = `select id, item, unit from items`;
+	let sql = `select id, item, unit from items where deleted = 0`;
 	let items = [];
 	db.each(sql, (err,row) => {
 		items.push(row);
@@ -116,7 +116,7 @@ app.get("/items", (req,res) => {
 });
 
 app.get("/customers", (req,res) => {
-	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id order by c.id`;
+	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id and c.deleted = 0 order by c.id`;
 	let customers = [], mappedCustomers;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
@@ -157,7 +157,7 @@ app.get("/customers", (req,res) => {
 app.post('/report', (req, res) => {
 	const range = req.body;
 	let orders = [], currOrder, mappedReceipts = [];
-	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and  o.created BETWEEN '${range.startDate}' AND '${range.endDate}' order by o.id`;
+	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and o.created BETWEEN '${range.startDate}' AND '${range.endDate}' order by o.id`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			orders.push(row);
@@ -264,16 +264,18 @@ app.post("/orders", (req, res) => {
 app.post("/verify", (req,res) => {
 	let verified = false;
 	let credentials = req.body;
-	let sql = `SELECT * FROM users WHERE name = ? AND password = ?`;
+	let sql = `SELECT * FROM users WHERE name = ? AND password = ? and deleted = 0`;
+	let currentUser;
 	db.serialize(() => {
 		db.each(sql, [credentials.username, credentials.password], (err, row) => {
 			verified = true;
-		}, (err, row) => {
-			logger.info('User %s logged in', row.id);
+			currentUser = row;
+		}, (err) => {
+			logger.info('User %s logged in', currentUser.id);
 			if(!verified){
 				res.status(500).send();
 			}else{
-				res.status(err ? 500:200).json(err || row);
+				res.status(200).json(currentUser.id);
 			}
 		});
 	});
@@ -331,6 +333,51 @@ app.post("/item", (req, res) => {
 		}
 		console.log("Added new item successfully");
 		logger.info('User %s added new item: %s', newItem.loggedIn, newItem.item);
+		res.status(200).send();
+	});
+});
+
+app.delete("/users/:id", (req, res) => {
+	const id = req.params.id;
+	let sql = `UPDATE users SET deleted = 1 WHERE id = ${id}`;
+	db.run(sql, function(err){
+		if(err){
+			logger.info('Found error when trying to delete user: %s', err);
+			return console.error("Error on deleting user: " + err);
+			res.status(500).send();
+		}
+		console.log(`User deleted: ${this.changes}`);
+		logger.info('User %s has been deleted', id);
+		res.status(200).send();
+	});
+});
+
+app.delete("/items/:id", (req, res) => {
+	const id = req.params.id;
+	let sql = `UPDATE items SET deleted = 1 WHERE id = ${id}`;
+	db.run(sql, function(err){
+		if(err){
+			logger.info('Found error when trying to delete item: %s', err);
+			return console.error("Error on deleting item: " + err);
+			res.status(500).send();
+		}
+		console.log(`Item deleted: ${this.changes}`);
+		logger.info('Item %s has been deleted', id);
+		res.status(200).send();
+	});
+})
+
+app.delete("/customers/:id", (req, res) => {
+	const id = req.params.id;
+	let sql = `UPDATE customers SET deleted = 1 WHERE id = ${id}`;
+	db.run(sql, function(err){
+		if(err){
+			logger.info('Found error when trying to delete customer: %s', err);
+			return console.error("Error on deleting customer: " + err);
+			res.status(500).send();
+		}
+		console.log(`Customer deleted: ${this.changes}`);
+		logger.info('Customer %s has been deleted', id);
 		res.status(200).send();
 	});
 });
