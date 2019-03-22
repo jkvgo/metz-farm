@@ -7,6 +7,8 @@ var UserSession = (function(){
 	const loggedIn = cookies.get('loggedIn');
 
 	var getStatus = function(){
+		const loggedIn = cookies.get('loggedIn');
+		if(loggedIn === undefined) return "false";
 		return loggedIn;
 	}
 

@@ -30,7 +30,7 @@ class Login extends Component{
 	verifyUser(e){
 		e.preventDefault();
 		const creds = this.state;
-		axios.post('verify', creds).then((res) => {
+		axios.post('http://localhost:3001/verify', creds).then((res) => {
 			const user = res.data;
 			if(user){
 				UserSession.setLoggedIn(user);

@@ -8,6 +8,8 @@ import History from './containers/History';
 import Login from './containers/Login';
 import Item from './containers/Item';
 import User from './containers/User';
+import Order from './containers/Order';
+import Details from './containers/Details';
 
 import UserSession from './UserSession';
 
@@ -23,6 +25,22 @@ function logout(){
 //     }
 // }
 
+function returnTabs(){
+    const status = UserSession.getStatus();
+    if(status === "true"){
+        return (
+            <ul className="main-nav">
+                <Link to="/">Receipt</Link>
+                <Link to="/customer">Customers</Link>
+                <Link to="/report">Report</Link>
+                <a href="#" onClick={() => logout()}>Log-out</a>
+            </ul>
+        );
+    }else{
+        return ""
+    }
+}
+
 const Routes = () => (
     <Router>
         <div>
@@ -31,12 +49,7 @@ const Routes = () => (
                 <Link to="/" className="main-logo">
                     <h1>METZ FARM</h1>
                 </Link>
-                <ul className="main-nav">
-                    <Link to="/">Receipt</Link>
-                    <Link to="/customer">Customers</Link>
-                    <Link to="/report">Report</Link>
-                    <a href="#" onClick={() => logout()}>Log-out</a>
-                </ul>
+                {returnTabs()}
             </nav>
             <Switch>
                 <Route path="/receipt" exact component={Receipt}/>
@@ -45,6 +58,8 @@ const Routes = () => (
                 <Route path="/report" exact component={Report}/>
                 <Route path="/item" exact component={Item}/>
                 <Route path="/user" exact component={User}/>
+                <Route path="/order" exact component={Order}/>
+                <Route exact path="/order/:id" component={Details}/>
                 <Route exact path="/customer/price/:id" component={Price}/>
                 <Route exact path="/customer/history/:id" component={History}/>
                 <Route component={Receipt}/>

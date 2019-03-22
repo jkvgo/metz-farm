@@ -6,7 +6,7 @@ const { createLogger, format, transports } = require("winston");
 const opn = require("opn");
 var path = require("path");
 
-const port = 3000;
+const port = 3001;
 const app = express();
 app.use(bodyParser.json());
 app.use(express.static('build'));
@@ -113,6 +113,29 @@ app.get("/items", (req,res) => {
 		logger.info('Found error when trying to retrieve items: %s', err);
 		res.status(err ? 500:200).json(err || items);
 	})
+});
+
+app.get("/orders", (req,res) => {
+	let sql = `select o.id, c.name as 'customer', u.name as 'username', o.created from orders o, customers c, users u where o.cust_id = c.id and o.created_by = u.id`;
+	let orders = [];
+	db.each((sql), (err,row) => {
+		orders.push(row);
+	}, (err) => {
+		logger.info('Found error when trying to retrieve orders: %s', err);
+		res.status(err ? 500:200).json(err || orders);
+	});
+});
+
+app.get("/orders/:id", (req,res) => {
+	let id = req.params.id;
+	let sql = `select od.order_id, i.item, i.unit, od.quantity, od.unit_price, od.price from order_details od, items i where od.item_id = i.id and od.order_id = ${id}`;
+	let details = [];
+	db.each((sql), (err, row) => {
+		details.push(row);
+	}, (err) => {
+		logger.info('Found error when trying to retrieve order details: %s', err);
+		res.status(err ? 500:200).json(err || details);
+	});
 });
 
 app.get("/customers", (req,res) => {
