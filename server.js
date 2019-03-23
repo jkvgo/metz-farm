@@ -6,7 +6,7 @@ const { createLogger, format, transports } = require("winston");
 const opn = require("opn");
 var path = require("path");
 
-const port = 3001;
+const port = 3000;
 const app = express();
 app.use(bodyParser.json());
 app.use(express.static('build'));
@@ -57,7 +57,9 @@ app.get("/history/:id", (req, res) => {
 		db.each(sql, (err, row) => {
 			results.push(row);
 		}, (err) => {
-			logger.info('Found error when trying to retrieve customer history: %s', err);
+			if(err){
+				logger.info('Found error when trying to retrieve customer history: %s', err);	
+			}
 			res.status(err ? 500:200).json(err || results);
 		});
 	});
@@ -87,7 +89,9 @@ app.get("/customers/:id", (req, res) => {
 	 				}
 	 			});
  			}
- 			logger.info('Found error when trying to retrieve customer details and prices: %s', err);
+ 			if(err){
+ 				logger.info('Found error when trying to retrieve customer details and prices: %s', err);	
+ 			}
  			res.status(err ? 500:200).json(err || customerPrice);
  		});
  	});
@@ -99,7 +103,9 @@ app.get("/users", (req,res) => {
 	db.each(sql, (err,row) => {
 		items.push(row);
 	}, (err) => {
-		logger.info('Found error when trying to retrieve users: %s', err);
+		if(err){
+			logger.info('Found error when trying to retrieve users: %s', err);	
+		}
 		res.status(err ? 500:200).json(err || items);
 	})
 });
@@ -110,30 +116,36 @@ app.get("/items", (req,res) => {
 	db.each(sql, (err,row) => {
 		items.push(row);
 	}, (err) => {
-		logger.info('Found error when trying to retrieve items: %s', err);
+		if(err){
+			logger.info('Found error when trying to retrieve items: %s', err);	
+		}
 		res.status(err ? 500:200).json(err || items);
 	})
 });
 
 app.get("/orders", (req,res) => {
-	let sql = `select o.id, c.name as 'customer', u.name as 'username', o.created from orders o, customers c, users u where o.cust_id = c.id and o.created_by = u.id`;
+	let sql = `select o.id, c.name as 'customer', u.name as 'username', o.created from orders o, customers c, users u where c.deleted = 0 and o.cust_id = c.id and o.created_by = u.id`;
 	let orders = [];
 	db.each((sql), (err,row) => {
 		orders.push(row);
 	}, (err) => {
-		logger.info('Found error when trying to retrieve orders: %s', err);
+		if(err){
+			logger.info('Found error when trying to retrieve orders: %s', err);	
+		}
 		res.status(err ? 500:200).json(err || orders);
 	});
 });
 
 app.get("/orders/:id", (req,res) => {
 	let id = req.params.id;
-	let sql = `select od.order_id, i.item, i.unit, od.quantity, od.unit_price, od.price from order_details od, items i where od.item_id = i.id and od.order_id = ${id}`;
+	let sql = `select c.name, od.order_id, i.item, i.unit, od.quantity, od.unit_price, od.price from order_details od, items i, customers c, orders o where od.order_id = o.id and o.cust_id = c.id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and od.order_id = ${id}`;
 	let details = [];
 	db.each((sql), (err, row) => {
 		details.push(row);
 	}, (err) => {
-		logger.info('Found error when trying to retrieve order details: %s', err);
+		if(err){
+			logger.info('Found error when trying to retrieve order details: %s', err);	
+		}
 		res.status(err ? 500:200).json(err || details);
 	});
 });
@@ -219,10 +231,8 @@ app.post("/users", (req, res) => {
 	db.run(sql, [user.name, user.password], function(err){
 		if(err){
 			logger.info('Found error when trying to insert into users table: %s', err);
-			return console.error(err.message);
 			res.status(500).json(err);
 		}
-		console.log("Inserted User successfully");
 		logger.info('New user created: %s', user.name);
 		res.status(200).send();
 	});
@@ -234,20 +244,16 @@ app.post("/customers", (req, res) => {
 	db.run(sql, [customer.name, customer.modified], function(err){
 		if(err){
 			logger.info('Found error when trying to insert into customers table: %s', err);
-			return console.error(err.message);
 			res.status(500).json(err);
 		}
-		console.log("Inserted Customers successfully");
 		let customerID = this.lastID;
 		logger.info('User %s created new customer: %s', customer.modified, customer.name);
 		let sqlPrice = `INSERT INTO customer_price(cust_id,item_id,price,modified) VALUES (?,?,?,?)`;
 		db.run(sqlPrice, [customerID, 1, 0, customer.modified], function(err2){
 			if(err2){
-				return console.error("Error on inserting to customer_price table: " + err2.message);
 				logger.info('Found error when trying to insert into customer price: %s', err2);
 				res.status(500).json(err2);
 			}
-			console.log("New customer default price inserted successfully");
 			res.status(200).send();
 		});
 	});
@@ -288,7 +294,9 @@ app.post("/verify", (req,res) => {
 	let verified = false;
 	let credentials = req.body;
 	let sql = `SELECT * FROM users WHERE name = ? AND password = ? and deleted = 0`;
-	let currentUser;
+	let currentUser = {
+		id: ""
+	};
 	db.serialize(() => {
 		db.each(sql, [credentials.username, credentials.password], (err, row) => {
 			verified = true;
@@ -310,10 +318,8 @@ app.post("/price", (req,res) => {
 	db.run(sql, function(err){
 		if(err){
 			logger.info('Found error when trying to update customer price: %s', err2);
-			return console.error("Error on updating customer price: " + err);
 			res.status(500).send();
 		}
-		console.log(`Customer price updated ${this.changes}`);
 		logger.info('User %s updated customer: %s with price %s', customerPrice.loggedIn, customerPrice.customer, customerPrice.price);
 
 		// Update customer price history table after price-update
@@ -322,9 +328,7 @@ app.post("/price", (req,res) => {
 		db.run(sqlBulk, function(err2){
 			if(err2){
 				logger.info('Found error when trying to insert into customer history: %s', err2);
-				return console.error("Error on updating customer history: " + err2);
 			}
-			console.log(`Customer history inserted ${this.changes}`);
 			res.status(200).send();
 		});
 	});
@@ -336,11 +340,9 @@ app.post("/addprice", (req,res) => {
 	db.run(sql, [newItem.cust_id, newItem.item_id, newItem.price, newItem.loggedIn], function(err){
 		if(err){
 			logger.info('Found error when trying to insert into customer price: %s', err);
-			return console.error("Error on inserting to customer_price table: " + err.message);
 			res.status(500).json(err);
 		}
 		logger.info('User %s added new price: %s for customer: %s', newItem.loggedIn, newItem.price, newItem.cust_id);
-		console.log("Added new customer price successfully");
 		res.status(200).send();
 	});
 });
@@ -351,10 +353,8 @@ app.post("/item", (req, res) => {
 	db.run(sql, [newItem.item, newItem.unit, newItem.loggedIn], function(err){
 		if(err){
 			logger.info('Found error when trying to insert into items: %s', err);
-			return console.error("Error on inserting new item: " + err.message);
 			res.status(500).json(err);
 		}
-		console.log("Added new item successfully");
 		logger.info('User %s added new item: %s', newItem.loggedIn, newItem.item);
 		res.status(200).send();
 	});
@@ -366,10 +366,8 @@ app.delete("/users/:id", (req, res) => {
 	db.run(sql, function(err){
 		if(err){
 			logger.info('Found error when trying to delete user: %s', err);
-			return console.error("Error on deleting user: " + err);
 			res.status(500).send();
 		}
-		console.log(`User deleted: ${this.changes}`);
 		logger.info('User %s has been deleted', id);
 		res.status(200).send();
 	});
@@ -381,10 +379,8 @@ app.delete("/items/:id", (req, res) => {
 	db.run(sql, function(err){
 		if(err){
 			logger.info('Found error when trying to delete item: %s', err);
-			return console.error("Error on deleting item: " + err);
 			res.status(500).send();
 		}
-		console.log(`Item deleted: ${this.changes}`);
 		logger.info('Item %s has been deleted', id);
 		res.status(200).send();
 	});
@@ -396,10 +392,8 @@ app.delete("/customers/:id", (req, res) => {
 	db.run(sql, function(err){
 		if(err){
 			logger.info('Found error when trying to delete customer: %s', err);
-			return console.error("Error on deleting customer: " + err);
 			res.status(500).send();
 		}
-		console.log(`Customer deleted: ${this.changes}`);
 		logger.info('Customer %s has been deleted', id);
 		res.status(200).send();
 	});

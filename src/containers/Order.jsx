@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
+import UserSession from '../UserSession';
 import axios from 'axios';
 
 class Order extends Component{
 	constructor(props){
+		UserSession.redirectToLogin()
 		super(props);
 		this.state = {
 			orders: [],
@@ -15,7 +17,7 @@ class Order extends Component{
 	}
 
 	getOrders(){
-		axios.get('http://localhost:3001/orders').then((res) => {
+		axios.get('orders').then((res) => {
             this.setState({
                 orders: res.data
             });

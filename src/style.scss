@@ -692,6 +692,7 @@ table{
 
 #orders{
     margin-top: 70px;
+    padding: 0 100px;
     a{
         color: black;
         text-decoration: none;
@@ -709,6 +710,7 @@ table{
         background-color: #2A2A2A;
     }
     table{
+        width: 100%;
         thead{
             th{
                 text-align: left;
@@ -717,10 +719,48 @@ table{
         tbody{
             tr{
                 border-top: 1px solid #F0F0F0;
+                td:last-child{
+                    text-align: right;
+                }
             }
             tr:first-child { border-top: none; }
             td{
                 padding: 10px 0;
+            }
+        }
+    }
+}
+
+#details{
+    margin-top: 70px;
+    padding: 0 100px;
+    .detail-header{
+        width: 50%;
+        h2{
+            display: inline-block;
+        }
+        h2:nth-of-type(2){
+            float:right;
+        }
+    }
+    table{
+        width: 50%;
+        thead{
+            th{
+                text-align: left;
+            }
+            th:last-child{
+                text-align: right;
+            }
+        }        
+        td{
+            padding: 10px 0;
+        }
+        tbody,tfoot{
+            tr{
+                td:last-child{
+                    text-align: right;
+                }
             }
         }
     }

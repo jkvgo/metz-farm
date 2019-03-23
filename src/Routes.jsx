@@ -31,6 +31,7 @@ function returnTabs(){
         return (
             <ul className="main-nav">
                 <Link to="/">Receipt</Link>
+                <Link to="/order">Orders</Link>
                 <Link to="/customer">Customers</Link>
                 <Link to="/report">Report</Link>
                 <a href="#" onClick={() => logout()}>Log-out</a>
