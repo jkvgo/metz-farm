@@ -435,14 +435,22 @@ table{
             }
             th{
                 text-align: center;
+                // border-left: 1px solid #F0F0F0;
+                // border-right: 1px solid #F0F0F0;
             }
             th.column-subhead{
-                text-align: left;
+                // text-align: left;
             }
         } 
         tbody{
             tr{
                 border-top: 1px solid #F0F0F0;
+                td:first-child{
+                    text-align: left;
+                }
+                td:last-child{
+                    text-align: left;
+                }
             }
             tr:first-child{
                 border-top: none;
@@ -450,6 +458,7 @@ table{
             td{
                 padding: 20px 0;
                 vertical-align: middle;
+                text-align: center;
             }
         }
         button{
@@ -560,6 +569,11 @@ table{
                 display: inline-block;
             }
         }
+    }
+    button{
+        font-size: 16px;
+        margin-left: 10px;
+        border-radius: 5px;
     }
     .add-button{
         display: block;
@@ -735,7 +749,7 @@ table{
     margin-top: 70px;
     padding: 0 100px;
     .detail-header{
-        width: 50%;
+        width: 70%;
         h2{
             display: inline-block;
         }
@@ -744,7 +758,7 @@ table{
         }
     }
     table{
-        width: 50%;
+        width: 70%;
         thead{
             th{
                 text-align: left;

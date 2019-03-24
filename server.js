@@ -302,10 +302,11 @@ app.post("/verify", (req,res) => {
 			verified = true;
 			currentUser = row;
 		}, (err) => {
-			logger.info('User %s logged in', currentUser.id);
 			if(!verified){
+				logger.info('Invalid Login Attempt', currentUser.id);
 				res.status(500).send();
 			}else{
+				logger.info('User %s logged in', currentUser.id);
 				res.status(200).json(currentUser.id);
 			}
 		});
@@ -328,6 +329,7 @@ app.post("/price", (req,res) => {
 		db.run(sqlBulk, function(err2){
 			if(err2){
 				logger.info('Found error when trying to insert into customer history: %s', err2);
+				res.status(500).send();
 			}
 			res.status(200).send();
 		});
@@ -343,7 +345,17 @@ app.post("/addprice", (req,res) => {
 			res.status(500).json(err);
 		}
 		logger.info('User %s added new price: %s for customer: %s', newItem.loggedIn, newItem.price, newItem.cust_id);
-		res.status(200).send();
+
+		// Update customer price history table after price-insert
+		let priceHistory = `(${newItem.cust_id}, ${newItem.item_id}, ${newItem.price}, ${newItem.loggedIn})`;
+		let sqlBulk = `INSERT INTO customer_history(cust_id, item_id, price, modified_by) VALUES ` + priceHistory;
+		db.run(sqlBulk, function(err2){
+			if(err2){
+				logger.info('Found error when trying to insert into customer history: %s', err2);
+				res.status(500).send();
+			}
+			res.status(200).send();
+		});
 	});
 });
 

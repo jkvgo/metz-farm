@@ -21,7 +21,7 @@ class Details extends Component{
 	}
 
 	getOrderDetails(){
-		axios.get("orders/"+this.orderID).then((res) => {
+		axios.get("http://localhost:3000/orders/"+this.orderID).then((res) => {
 			this.setState({
 				details: res.data,
 				orderID: res.data[0].order_id,
