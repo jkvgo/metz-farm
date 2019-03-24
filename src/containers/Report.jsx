@@ -19,12 +19,32 @@ class Report extends Component{
         	endDate: new Date(),
         	receipts: [],
             hideButton: "",
-            hideDownload: "hide"
+            hideDownload: "hide",
+            customers: [],
+            chosenCustomer: "all"
         };
         this.setStartDate = this.setStartDate.bind(this);
         this.setEndDate = this.setEndDate.bind(this);
         this.generateReport = this.generateReport.bind(this);
         this.downloadReport = this.downloadReport.bind(this);
+        this.getCustomers = this.getCustomers.bind(this);
+        this.chooseCustomer = this.chooseCustomer.bind(this);
+        this.getCustomers();
+    }
+
+    getCustomers(){
+        axios.get("basecustomers").then((res) => {
+            this.setState({
+                customers: res.data
+            });
+        });
+    }
+
+    chooseCustomer(e){
+        const customer = e.target.value;
+        this.setState({
+            chosenCustomer: customer
+        });
     }
 
     setStartDate(date){
@@ -40,9 +60,14 @@ class Report extends Component{
     }
 
     generateReport(){
+        this.setState({
+            receipts: []
+        });
         const startDate = this.state.startDate ? this.state.startDate : "";
         const endDate = this.state.endDate ? this.state.endDate : "";
+        const chosenCustomer = this.state.chosenCustomer;
         let range = {
+            customer: chosenCustomer,
             startDate: startDate,
             endDate: endDate
         };
@@ -77,6 +102,12 @@ class Report extends Component{
     	const endDate = this.state.endDate;
         const hideButton = this.state.hideButton;
         const hideDownload = this.state.hideDownload;
+        const customers = this.state.customers.length ? this.state.customers.map((c, key) => {
+            return (
+                <option key={key} value={c.id}>{c.name}</option>
+            )
+        }) : [];
+        const chosenCustomer = this.state.chosenCustomer;
         let grandTotal = 0;
         let hide = "hide";
         let reportGrandTotal = 0;
@@ -127,6 +158,13 @@ class Report extends Component{
         return(
             <div id="report" className="center-container">
             	<h2>Report</h2>
+                <div className="date-range">
+                    Customer:
+                    <select onChange={(e) => this.chooseCustomer(e)}>
+                        <option value="all">All</option>
+                        {customers}
+                    </select>
+                </div>
             	<div className="date-range">
             		From:
             		<DatePicker selected={startDate} onChange={this.setStartDate}/>

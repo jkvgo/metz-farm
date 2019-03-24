@@ -150,6 +150,21 @@ app.get("/orders/:id", (req,res) => {
 	});
 });
 
+app.get("/basecustomers", (req,res) => {
+	let sql = `select id, name from customers where deleted = 0`;
+	let customers = [];
+	db.serialize(() => {
+		db.each(sql, (err, row) => {
+			customers.push(row);
+		}, (err) => {
+			if(err){
+				logger.info('Found error when trying to retrieve order details: %s', err);	
+			}
+			res.status(err ? 500:200).json(err || customers);
+		});
+	});
+});
+
 app.get("/customers", (req,res) => {
 	let sql = `select c.id, c.name, i.id as 'itemID', i.item, i.unit, cp.price from customers c, customer_price cp, items i where c.id = cp.cust_id and cp.item_id = i.id and c.deleted = 0 order by c.id`;
 	let customers = [], mappedCustomers;
@@ -191,8 +206,11 @@ app.get("/customers", (req,res) => {
 
 app.post('/report', (req, res) => {
 	const range = req.body;
-	let orders = [], currOrder, mappedReceipts = [];
-	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and o.created BETWEEN '${range.startDate}' AND '${range.endDate}' order by o.id`;
+	let orders = [], currOrder, mappedReceipts = [], customerFilter = "";
+	if(range.customer !== "all"){
+		customerFilter = `AND c.id = ${range.customer}`;
+	}
+	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and o.created BETWEEN '${range.startDate}' AND '${range.endDate}' ${customerFilter} order by o.id`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			orders.push(row);
