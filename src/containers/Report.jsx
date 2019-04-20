@@ -86,10 +86,49 @@ class Report extends Component{
             hideButton: "hide"
         });
         const reportDiv = document.getElementById("report");
+        const pdf = new jsPDF('l');
+
         html2canvas(reportDiv).then((canvas) => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF();
-            pdf.addImage(imgData, 'PNG', 10, 20, 210, 0);
+            for (var i = 0; i <= reportDiv.clientHeight/980; i++) {
+                //! This is all just html2canvas stuff
+                var srcImg  = canvas;
+                var sX      = 0;
+                var sY      = 840*i; // start 980 pixels down for every new page
+                var sWidth  = 1200;
+                var sHeight = 840;
+                var dX      = 0;
+                var dY      = 0;
+                var dWidth  = 1178;
+                var dHeight = 840;
+
+                window.onePageCanvas = document.createElement("canvas");
+                onePageCanvas.setAttribute('width', 1198);
+                onePageCanvas.setAttribute('height', 840);
+                var ctx = onePageCanvas.getContext('2d');
+                // details on this usage of this function: 
+                // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Using_images#Slicing
+                ctx.drawImage(srcImg,sX,sY,sWidth,sHeight,dX,dY,dWidth,dHeight);
+
+                // document.body.appendChild(canvas);
+                var canvasDataURL = onePageCanvas.toDataURL("image/png", 1.0);
+
+                var width         = onePageCanvas.width;
+                var height        = onePageCanvas.clientHeight;
+
+                //! If we're on anything other than the first page,
+                // add another page
+                if (i > 0) {
+                    // pdf.addPage(595, 842); //8.5" x 11" in pts (in*72)
+                    // pdf.addPage(842, 595);
+                    pdf.addPage('l');
+                }
+                //! now we declare that we're working on that page
+                pdf.setPage(i+1);
+                //! now we add content to that page!
+                pdf.addImage(canvasDataURL, 'PNG', 10, 15, 240, 0);
+
+            }
+
             pdf.save('report.pdf');
             this.setState({
                 hideButton: ""
@@ -123,14 +162,15 @@ class Report extends Component{
                         }
 						return(
 							<tr key={rec.customer+index}>
-								<td rowSpan={rec.orders.length} valign="top">{rec.receiptID}</td>
+                                <td className="td-minimum-width" rowSpan={rec.orders.length} valign="top">{rec.created}</td>
+								<td rowSpan={rec.orders.length} valign="top" className="right-text padding-right-30">{rec.receiptID}</td>
 			    				<td rowSpan={rec.orders.length} valign="top">{rec.customer}</td>
 			    				<td>{rec.orders[0].item}</td>
-								<td>{rec.orders[0].quantity}</td>
+								<td className="right-text padding-right-20">{rec.orders[0].quantity}</td>
 								<td>{rec.orders[0].unit}</td>
-								<td>{rec.orders[0].price}</td>
-								<td>{rec.orders[0].total}</td>
-                                <td className={hide}><b>{grandTotal}</b></td>
+								<td className="right-text" >{parseFloat(rec.orders[0].price.toFixed(2)).toLocaleString()}</td>
+								<td className="right-text">{parseFloat(rec.orders[0].total.toFixed(2)).toLocaleString()}</td>
+                                <td className={hide + " right-text"}><b>{parseFloat(grandTotal.toFixed(2)).toLocaleString()}</b></td>
 		    				</tr>
 						)
 					}else{
@@ -142,11 +182,11 @@ class Report extends Component{
 						return(
 							<tr key={rec.customer+index} className="no-border">
 								<td>{ord.item}</td>
-								<td>{ord.quantity}</td>
+								<td className="right-text padding-right-20">{ord.quantity}</td>
 								<td>{ord.unit}</td>
-								<td>{ord.price}</td>
-								<td>{ord.total}</td>
-                                <td className={hide}><b>{grandTotal}</b></td>
+								<td className="right-text">{parseFloat(ord.price.toFixed(2)).toLocaleString()}</td>
+								<td className="right-text">{parseFloat(ord.total.toFixed(2)).toLocaleString()}</td>
+                                <td className={hide + " right-text"}><b>{parseFloat(grandTotal.toFixed(2)).toLocaleString()}</b></td>
 							</tr>
 						)
 					}
@@ -177,14 +217,15 @@ class Report extends Component{
             	<table>
             		<thead>
             			<tr>
-            				<th>Order No.</th>
+                            <th className="td-minimum-width">Date</th>
+            				<th className="right-text padding-right-30">Order No.</th>
             				<th>Customer</th>
             				<th>Item</th>
-            				<th>Qty</th>
+            				<th className="right-text padding-right-20">Qty</th>
             				<th>Unit</th>
-            				<th>Price per Unit</th>
-            				<th>Total Price</th>
-                            <th>Grand Total</th>
+            				<th className="right-text">Price per Unit</th>
+            				<th className="right-text">Total Price</th>
+                            <th className="right-text">Grand Total</th>
             			</tr>
             		</thead>
             		<tbody>
@@ -198,8 +239,9 @@ class Report extends Component{
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                             <td><b>Report Total:</b></td>
-                            <td><b>{reportGrandTotal}</b></td>
+                            <td className="right-text"><b>{parseFloat(reportGrandTotal.toFixed(2)).toLocaleString()}</b></td>
                         </tr>
                     </tfoot>
             	</table>

@@ -124,7 +124,7 @@ app.get("/items", (req,res) => {
 });
 
 app.get("/orders", (req,res) => {
-	let sql = `select o.id, c.name as 'customer', u.name as 'username', o.created from orders o, customers c, users u where c.deleted = 0 and o.cust_id = c.id and o.created_by = u.id`;
+	let sql = `select o.id, c.name as 'customer', u.name as 'username', o.created from orders o, customers c, users u where c.deleted = 0 and o.deleted = 0 and o.cust_id = c.id and o.created_by = u.id order by o.id DESC`;
 	let orders = [];
 	db.each((sql), (err,row) => {
 		orders.push(row);
@@ -138,7 +138,7 @@ app.get("/orders", (req,res) => {
 
 app.get("/orders/:id", (req,res) => {
 	let id = req.params.id;
-	let sql = `select c.name, od.order_id, i.item, i.unit, od.quantity, od.unit_price, od.price from order_details od, items i, customers c, orders o where od.order_id = o.id and o.cust_id = c.id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and od.order_id = ${id}`;
+	let sql = `select c.name, od.order_id, i.item, i.unit, od.quantity, od.unit_price, od.price, o.created from order_details od, items i, customers c, orders o where od.order_id = o.id and o.cust_id = c.id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and od.order_id = ${id}`;
 	let details = [];
 	db.each((sql), (err, row) => {
 		details.push(row);
@@ -210,7 +210,7 @@ app.post('/report', (req, res) => {
 	if(range.customer !== "all"){
 		customerFilter = `AND c.id = ${range.customer}`;
 	}
-	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and o.created BETWEEN '${range.startDate}' AND '${range.endDate}' ${customerFilter} order by o.id`;
+	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and o.deleted = 0 and o.created BETWEEN '${range.startDate}' AND '${range.endDate}' ${customerFilter} order by o.id`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			orders.push(row);
@@ -230,6 +230,7 @@ app.post('/report', (req, res) => {
 					mappedReceipts.push({
 						receiptID: ord.id,
 						customer: ord.name,
+						created: ord.created,
 						orders: [ {item: ord.item, quantity: ord.quantity, unit: ord.unit, price: ord.unit_price, total: ord.price} ]
 					});
 					currOrder = ord.id;
@@ -237,7 +238,7 @@ app.post('/report', (req, res) => {
 			});
 			if(err){
 				logger.info('Found error when trying to generate report: %s', err);	
-			}
+		 	}
 			res.status(err ? 500:200).json(err || mappedReceipts);
 		});
 	});
@@ -386,6 +387,19 @@ app.post("/item", (req, res) => {
 			res.status(500).json(err);
 		}
 		logger.info('User %s added new item: %s', newItem.loggedIn, newItem.item);
+		res.status(200).send();
+	});
+});
+
+app.delete("/orders/:id", (req, res) => {
+	const id = req.params.id;
+	let sql = `UPDATE orders SET deleted = 1 WHERE id = ${id}`;
+	db.run(sql, function(err){
+		if(err){
+			logger.info('Found error when trying to delete order: %s', err);
+			res.status(500).send();
+		}
+		logger.info('Order %s has been deleted', id);
 		res.status(200).send();
 	});
 });

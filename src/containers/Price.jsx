@@ -100,14 +100,14 @@ class Price extends Component{
 	}
 
 	updateInput(id,value){
-		if(value >= 0){
+		// if(value >= 0){
 			let items = this.state.items.length ? this.state.items : [];
 			let chosenItemIndex = items.findIndex(item => item.id === id);
 			items[chosenItemIndex].value = value;
 			this.setState({
 				items: items
 			});
-		}
+		// }
 	}
 
 	editPrice(id){
@@ -231,13 +231,13 @@ class Price extends Component{
 	}
 
 	setNewPrice(val){
-		if(val >= 0){
+		// if(val >= 0){
 			const newItem = this.state.newItem ? this.state.newItem : {};
 			newItem.price = val;
 			this.setState({
 				newItem: newItem
 			});
-		}
+		// }
 	}
 
 	render(){
@@ -294,7 +294,7 @@ class Price extends Component{
 						<td>{item.unit}</td>
 						<td>
 							<div className={item.status}>
-								<b>{item.value}</b>
+								<b>{item.value.toLocaleString()}</b>
 								<input type="number" placeholder={item.value} onChange={(e) => this.updateInput(item.id, e.target.value) } value={item.value} />
 							</div>
 						</td>

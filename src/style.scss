@@ -89,6 +89,27 @@
     text-align: left !important;
 }
 
+.right-text{
+    text-align: right !important;
+}
+
+.padding-right-30{
+    padding-right: 30px !important;
+}
+
+.padding-right-20{
+    padding-right: 20px !important;
+}
+
+.padding-right-10{
+    padding-right: 10px !important;
+}
+
+.td-minimum-width{
+    white-space: nowrap;
+    width: 1%;
+}
+
 .margin-top-70{
     margin-top: 70px;
 }
@@ -96,7 +117,7 @@
 // CUSTOM CSS
 
 body{
-    font-family: 'Tahoma';
+    font-family: 'Courier New';
     margin: 0;
 }
 
@@ -239,7 +260,7 @@ table{
         }
     }
     .order-display{
-        margin-left: 50px;
+        margin-left: 25px;
         flex-grow: 1;
         table{
             width: 100%;
@@ -249,7 +270,12 @@ table{
             }
             tbody{
                 td{
-                    padding-top: 10px;
+                    padding: 5px 0;
+                }
+                tr{
+                    td:last-child{
+                        cursor: pointer;
+                    }
                 }
             }
         }
@@ -740,7 +766,24 @@ table{
             tr:first-child { border-top: none; }
             td{
                 padding: 10px 0;
+                &.default{
+                    a{
+                        display: inline-block;
+                    }
+                    a.delete-mode,input{
+                        display: none;
+                    }
+                }
+                &.delete{
+                    a{
+                        display: none;
+                    }
+                    a.delete-mode,input{
+                        display: inline-block;
+                    }
+                }
             }
+
         }
     }
 }
@@ -748,17 +791,22 @@ table{
 #details{
     margin-top: 70px;
     padding: 0 100px;
+    font-size: 1.2em;
     .detail-header{
-        width: 70%;
+        width: 100%;
         h2{
             display: inline-block;
         }
         h2:nth-of-type(2){
             float:right;
         }
+        h3{
+            float:right;
+            margin-top: 0;
+        }
     }
     table{
-        width: 70%;
+        width: 100%;
         thead{
             th{
                 text-align: left;
@@ -768,7 +816,7 @@ table{
             }
         }        
         td{
-            padding: 10px 0;
+            padding: 4px 0;
         }
         tbody,tfoot{
             tr{

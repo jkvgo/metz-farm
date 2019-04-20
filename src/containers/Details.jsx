@@ -25,7 +25,8 @@ class Details extends Component{
 			this.setState({
 				details: res.data,
 				orderID: res.data[0].order_id,
-				customer: res.data[0].name
+				customer: res.data[0].name,
+				date: res.data[0].created
 			});
 		});
 	}
@@ -38,7 +39,7 @@ class Details extends Component{
 		html2canvas(receiptDiv).then((canvas) => {
 			const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF();
-            pdf.addImage(imgData, 'PNG', 10, 20, 210, 0);
+            pdf.addImage(imgData, 'PNG', 0, 20, 210, 0);
             pdf.save('receipt.pdf');
             this.setState({
                 hideButton: ""
@@ -50,6 +51,7 @@ class Details extends Component{
 		const orderID = this.state.orderID;
 		const customer = this.state.customer;
 		const hideButton = this.state.hideButton;
+		const orderDate = this.state.date;
 		let grandTotal = 0;
 		const details = this.state.details.length ? this.state.details.map((det,key) => {
 			grandTotal += det.price;
@@ -58,8 +60,8 @@ class Details extends Component{
 					<td>{det.item}</td>
 					<td>{det.quantity}</td>
 					<td>{det.unit}</td>
-					<td>{det.unit_price}</td>
-					<td>{det.price}</td>
+					<td>{parseFloat(det.unit_price.toFixed(2)).toLocaleString()}</td>
+					<td>{parseFloat(det.price.toFixed(2)).toLocaleString()}</td>
 				</tr>
 			)
 		}) : [];
@@ -68,6 +70,8 @@ class Details extends Component{
 				<div className="detail-header">
 					<h2>Order Number: <b>{orderID}</b></h2>
 					<h2>Customer: <b>{customer}</b></h2>
+					<br/>
+					<h3>Date: <b>{orderDate}</b></h3>
 				</div>
 				<table>
 					<thead>
@@ -88,7 +92,7 @@ class Details extends Component{
 							<td></td>
 							<td></td>
 							<td style={{textAlign:"right"}}>Grand Total:</td>
-							<td><b>{grandTotal}</b></td>
+							<td><b>{parseFloat(grandTotal.toFixed(2)).toLocaleString()}</b></td>
 						</tr>
 					</tfoot>
 				</table>

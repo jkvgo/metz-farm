@@ -74,7 +74,7 @@ class History extends Component{
 				{
 					val.map((val2,key2) => {
 						return(
-							<td key={key+key2}>{val2}</td>
+							<td key={key+key2}>{val2.toLocaleString()}</td>
 						)
 					})
 				}

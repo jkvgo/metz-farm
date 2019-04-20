@@ -22,6 +22,7 @@ class Receipt extends Component{
         this.chooseItem = this.chooseItem.bind(this);
         this.submitOrder = this.submitOrder.bind(this);
         this.changeQuantity = this.changeQuantity.bind(this);
+        this.removeOrder = this.removeOrder.bind(this);
         this.getCustomers();
     }
 
@@ -101,12 +102,25 @@ class Receipt extends Component{
         }   
     }
 
+    removeOrder(key){
+        let orders = this.state.orders;
+        let showSummary = "show";
+        orders.splice(key,1);
+        if(orders.length === 0){
+            showSummary = "hide";
+        }
+        this.setState({
+            orders: orders,
+            showSummary: showSummary
+        });
+    }
+
     changeQuantity(val){
-        if(val >= 1){
+        // if(val >= 1){
             this.setState({
                 chosenItemQuantity: val
             });
-        }
+        // }
     }
 
     render(){
@@ -136,6 +150,7 @@ class Receipt extends Component{
                     <td>{ord.unit}</td>
                     <td>{ord.price}</td>
                     <td>{ord.totalPrice}</td>
+                    <td onClick={() => this.removeOrder(key) }>X</td>
                 </tr>
             )
         }) : [];
@@ -189,6 +204,7 @@ class Receipt extends Component{
                                 <th>Unit</th>
                                 <th>Price per Unit</th>
                                 <th>Total Price</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
