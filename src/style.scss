@@ -769,9 +769,19 @@ table{
                 &.default{
                     a{
                         display: inline-block;
+                        &.cancelled{
+                            display: none;
+                        }
                     }
                     a.delete-mode,input{
                         display: none;
+                    }
+                    b{
+                        display: none;
+                        margin-left: 20px;
+                        &.cancelled{
+                            display: inline-block;
+                        }
                     }
                 }
                 &.delete{
@@ -780,6 +790,13 @@ table{
                     }
                     a.delete-mode,input{
                         display: inline-block;
+                    }
+                    b{
+                        display: none;
+                        margin-left: 20px;
+                        &.cancelled{
+                            display: inline-block;
+                        }
                     }
                 }
             }
@@ -791,7 +808,7 @@ table{
 #details{
     margin-top: 70px;
     padding: 0 100px;
-    font-size: 1.2em;
+    font-size: 1.5em;
     .detail-header{
         width: 100%;
         h2{

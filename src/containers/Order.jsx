@@ -26,7 +26,9 @@ class Order extends Component{
 	getOrders(){
 		axios.get('orders').then((res) => {
             this.setState({
-                orders: res.data
+                orders: res.data,
+                deleteMode: "default",
+                deletePass: ""
             });
         });
 	}
@@ -50,7 +52,7 @@ class Order extends Component{
 		e.preventDefault();
 		const deletePass = this.state.deletePass;
 		if(deletePass === this.deletePass){
-			let agree = confirm("Are you sure you want to delete this order?");
+			let agree = confirm("Are you sure you want to cancel this order?");
 			if(agree){
 				axios.delete('orders/'+id).then((res) => {
 					this.getOrders();
@@ -73,6 +75,8 @@ class Order extends Component{
 		const currentPath = this.state.path ? this.state.path : "";
 		const orders = this.state.orders.length ? this.state.orders.map((o, key) => {
 			let deleteModeClass = o.id === deleteMode ? "delete" : "default";
+			let cancelled = "";
+			if(o.deleted === 1) cancelled = "cancelled";
 			return(
 				<tr key={key}>
 					<td>{o.id}</td>
@@ -81,10 +85,11 @@ class Order extends Component{
 					<td>{o.created}</td>
 					<td className={deleteModeClass}>
 						<Link to={`${currentPath}/${o.id}`}>View Order Details</Link>
-						<a href="#" onClick={(e) => this.deleteOrder(e,o.id)}>Delete</a>
+						<a href="#" className={cancelled} onClick={(e) => this.deleteOrder(e,o.id)}>Cancel</a>
+						<b className={cancelled} >Cancelled</b>
 						<input className={"delete-mode"} type="password" value={deletePass} onChange={(e) => this.updatePass(e.target.value)}/>
 						<a className={"delete-mode"} href="#" onClick={(e) => this.confirmDelete(e, o.id)}>Confirm</a>
-						<a className={"delete-mode"} href="#" onClick={(e) => this.cancelConfirmDelete(e)}>Cancel</a>
+						<a className={"delete-mode"} href="#" onClick={(e) => this.cancelConfirmDelete(e)}>Back</a>
 					</td>
 				</tr>
 			);

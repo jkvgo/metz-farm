@@ -28,12 +28,20 @@ class Receipt extends Component{
 
     submitOrder(){
         const orders = this.state.orders;
-        axios.post("orders", orders).then((res) => {
-            if(res.status === 200){
-                alert(res.data);
-                this.getCustomers();
-            }else{
-                alert("Unable to submit order");
+        const loggedIn = this.state.loggedIn;
+        let loggedInName;
+        axios.get("users/"+loggedIn).then((res) => {
+            loggedInName =  res.data[0].name;
+            let agree = confirm("Are you sure you want to submit this order " + loggedInName + "?");
+            if(agree){
+                axios.post("orders", orders).then((res) => {
+                    if(res.status === 200){
+                        alert(res.data);
+                        this.getCustomers();
+                    }else{
+                        alert("Unable to submit order");
+                    }
+                });    
             }
         });
     }

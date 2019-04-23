@@ -110,6 +110,20 @@ app.get("/users", (req,res) => {
 	})
 });
 
+app.get("/users/:id", (req,res) => {
+	let id = req.params.id;
+	let sql = `select * from users where id = ${id}`;
+	let user = [];
+	db.each((sql), (err, row) => {
+		user.push(row);
+	}, (err) => {
+		if(err){
+			logger.info('Found error when trying to retrieve user: %s', err);	
+		}
+		res.status(err ? 500:200).json(err || user);
+	});
+});
+
 app.get("/items", (req,res) => {
 	let sql = `select id, item, unit from items where deleted = 0`;
 	let items = [];
@@ -124,7 +138,7 @@ app.get("/items", (req,res) => {
 });
 
 app.get("/orders", (req,res) => {
-	let sql = `select o.id, c.name as 'customer', u.name as 'username', o.created from orders o, customers c, users u where c.deleted = 0 and o.deleted = 0 and o.cust_id = c.id and o.created_by = u.id order by o.id DESC`;
+	let sql = `select o.id, c.name as 'customer', u.name as 'username', o.created, o.deleted from orders o, customers c, users u where c.deleted = 0 and o.cust_id = c.id and o.created_by = u.id order by o.id DESC`;
 	let orders = [];
 	db.each((sql), (err,row) => {
 		orders.push(row);
@@ -210,13 +224,14 @@ app.post('/report', (req, res) => {
 	if(range.customer !== "all"){
 		customerFilter = `AND c.id = ${range.customer}`;
 	}
-	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and o.deleted = 0 and o.created BETWEEN '${range.startDate}' AND '${range.endDate}' ${customerFilter} order by o.id`;
+	let sql = `select o.id, c.name, o.created, i.id as 'item_id', i.item, i.unit, od.quantity, od.unit_price, od.price, o.deleted from orders o, order_details od, items i, customers c where o.cust_id = c.id and o.id = od.order_id and od.item_id = i.id and c.deleted = 0 and i.deleted = 0 and o.created BETWEEN '${range.startDate}' AND '${range.endDate}' ${customerFilter} order by o.id`;
 	db.serialize(() => {
 		db.each(sql, (err, row) => {
 			orders.push(row);
 		}, (err) => {
 			orders.forEach((ord) => {
 				if(currOrder === ord.id){
+					if(ord.deleted === 1) ord.price = "Cancelled";
 					mappedReceipts.find(r => r.receiptID === ord.id).orders.push(
 						{
 							item: ord.item,
@@ -227,6 +242,7 @@ app.post('/report', (req, res) => {
 						}
 					);
 				}else{
+					if(ord.deleted === 1) ord.price = "Cancelled";
 					mappedReceipts.push({
 						receiptID: ord.id,
 						customer: ord.name,

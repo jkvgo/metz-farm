@@ -93,17 +93,17 @@ class Report extends Component{
                 //! This is all just html2canvas stuff
                 var srcImg  = canvas;
                 var sX      = 0;
-                var sY      = 840*i; // start 980 pixels down for every new page
+                var sY      = 876*i; // start 980 pixels down for every new page
                 var sWidth  = 1200;
-                var sHeight = 840;
+                var sHeight = 876;
                 var dX      = 0;
                 var dY      = 0;
                 var dWidth  = 1178;
-                var dHeight = 840;
+                var dHeight = 876;
 
                 window.onePageCanvas = document.createElement("canvas");
                 onePageCanvas.setAttribute('width', 1198);
-                onePageCanvas.setAttribute('height', 840);
+                onePageCanvas.setAttribute('height', 876);
                 var ctx = onePageCanvas.getContext('2d');
                 // details on this usage of this function: 
                 // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Using_images#Slicing
@@ -147,14 +147,23 @@ class Report extends Component{
             )
         }) : [];
         const chosenCustomer = this.state.chosenCustomer;
-        let grandTotal = 0;
+        let grandTotal = 0, grandTotalText = "";
         let hide = "hide";
         let reportGrandTotal = 0;
     	const receipts = this.state.receipts.length ? this.state.receipts.map((rec) => {
     		return(
 				rec.orders.map((ord, index) => {
+                    let totalText = "";
 					if(index === 0){
-                        grandTotal = rec.orders[0].total;
+                        if(rec.orders[0].total === "Cancelled"){
+                            grandTotal = 0;
+                            totalText = "Cancelled";
+                            grandTotalText = "Cancelled";
+                        }else{
+                            grandTotal = rec.orders[0].total;
+                            totalText = parseFloat(rec.orders[0].total.toFixed(2)).toLocaleString();
+                            grandTotalText = parseFloat(grandTotal.toFixed(2)).toLocaleString();
+                        }
                         hide = "hide";
                         if(rec.orders.length === index+1){
                             hide = "";
@@ -169,15 +178,22 @@ class Report extends Component{
 								<td className="right-text padding-right-20">{rec.orders[0].quantity}</td>
 								<td>{rec.orders[0].unit}</td>
 								<td className="right-text" >{parseFloat(rec.orders[0].price.toFixed(2)).toLocaleString()}</td>
-								<td className="right-text">{parseFloat(rec.orders[0].total.toFixed(2)).toLocaleString()}</td>
-                                <td className={hide + " right-text"}><b>{parseFloat(grandTotal.toFixed(2)).toLocaleString()}</b></td>
+								<td className="right-text">{totalText}</td>
+                                <td className={hide + " right-text"}><b>{grandTotalText}</b></td>
 		    				</tr>
 						)
 					}else{
-                        grandTotal += ord.total;
+                        if(ord.total !== "Cancelled") grandTotal += ord.total;
                         if(rec.orders.length === index+1){
                             hide = "";
                             reportGrandTotal += grandTotal;
+                        }
+                        if(ord.total === "Cancelled"){
+                            totalText = "Cancelled";
+                            grandTotalText = "Cancelled";
+                        }else{
+                            totalText = parseFloat(rec.orders[0].total.toFixed(2)).toLocaleString();
+                            grandTotalText = parseFloat(grandTotal.toFixed(2)).toLocaleString();
                         }
 						return(
 							<tr key={rec.customer+index} className="no-border">
@@ -185,8 +201,8 @@ class Report extends Component{
 								<td className="right-text padding-right-20">{ord.quantity}</td>
 								<td>{ord.unit}</td>
 								<td className="right-text">{parseFloat(ord.price.toFixed(2)).toLocaleString()}</td>
-								<td className="right-text">{parseFloat(ord.total.toFixed(2)).toLocaleString()}</td>
-                                <td className={hide + " right-text"}><b>{parseFloat(grandTotal.toFixed(2)).toLocaleString()}</b></td>
+								<td className="right-text">{totalText}</td>
+                                <td className={hide + " right-text"}><b>{grandTotalText}</b></td>
 							</tr>
 						)
 					}
