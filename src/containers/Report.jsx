@@ -169,9 +169,11 @@ class Report extends Component{
                             hide = "";
                             reportGrandTotal += grandTotal;
                         }
+                        let localDate = new Date(rec.created);
+                        localDate.setHours(localDate.getHours() + 8);
 						return(
 							<tr key={rec.customer+index}>
-                                <td className="td-minimum-width" rowSpan={rec.orders.length} valign="top">{rec.created}</td>
+                                <td className="td-minimum-width" rowSpan={rec.orders.length} valign="top">{localDate.toLocaleString()}</td>
 								<td rowSpan={rec.orders.length} valign="top" className="right-text padding-right-30">{rec.receiptID}</td>
 			    				<td rowSpan={rec.orders.length} valign="top">{rec.customer}</td>
 			    				<td>{rec.orders[0].item}</td>
@@ -192,7 +194,7 @@ class Report extends Component{
                             totalText = "Cancelled";
                             grandTotalText = "Cancelled";
                         }else{
-                            totalText = parseFloat(rec.orders[0].total.toFixed(2)).toLocaleString();
+                            totalText = parseFloat(ord.total.toFixed(2)).toLocaleString();
                             grandTotalText = parseFloat(grandTotal.toFixed(2)).toLocaleString();
                         }
 						return(

@@ -76,13 +76,15 @@ class Order extends Component{
 		const orders = this.state.orders.length ? this.state.orders.map((o, key) => {
 			let deleteModeClass = o.id === deleteMode ? "delete" : "default";
 			let cancelled = "";
+			let localDate = new Date(o.created);
+			localDate.setHours(localDate.getHours() + 8);
 			if(o.deleted === 1) cancelled = "cancelled";
 			return(
 				<tr key={key}>
 					<td>{o.id}</td>
 					<td>{o.customer}</td>
 					<td>{o.username}</td>
-					<td>{o.created}</td>
+					<td>{localDate.toLocaleString()}</td>
 					<td className={deleteModeClass}>
 						<Link to={`${currentPath}/${o.id}`}>View Order Details</Link>
 						<a href="#" className={cancelled} onClick={(e) => this.deleteOrder(e,o.id)}>Cancel</a>
