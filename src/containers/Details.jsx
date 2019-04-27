@@ -17,6 +17,9 @@ class Details extends Component{
 			hideButton: ""
 		};
 		this.getOrderDetails = this.getOrderDetails.bind(this);
+		this.downloadWord = this.downloadWord.bind(this);
+		this.downloadReceipt = this.downloadReceipt.bind(this);
+		this.printReceipt = this.printReceipt.bind(this);
 		this.getOrderDetails();
 	}
 
@@ -31,6 +34,79 @@ class Details extends Component{
 		});
 	}
 
+	downloadWord(){
+        this.setState({
+            hideButton: "hide"
+        });
+
+        var css = (
+	     '<style>' +
+	     '@page WordSection1{size: 595.35pt 841.95pt;mso-page-orientation: portrait;}' +
+	     'div.WordSection1 {page: WordSection1;}' +
+	     '</style>'
+	   );
+
+	   var html = document.getElementById("details").innerHTML;
+	   var blob = new Blob(['\ufeff', css + html], {
+	     type: 'application/msword'
+	   });
+	   var url = URL.createObjectURL(blob);
+	   var link = document.createElement('A');
+	   link.href = url;
+	   link.download = 'Receipt';  // default name without extension 
+	   document.body.appendChild(link);
+	   if (navigator.msSaveOrOpenBlob ) navigator.msSaveOrOpenBlob( blob, 'Receipt.doc'); // IE10-11
+	       else link.click();  // other browsers
+	   document.body.removeChild(link);
+
+	   this.setState({
+	   		hideButton: ""
+	   });
+
+        // OLD
+
+     //    var css = (
+	    //  	'<style>' +
+	    //  	'@page WordSection1{size: 1pt 1pt;mso-page-orientation: landscape;}' +
+	    //  	'div.WordSection1 {page: WordSection1;}' +
+	    //  	'</style>'
+	   	// );
+     //    var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title>"+css+"</head><body>";
+     //    var postHtml = "</body></html>";
+     //    var html = preHtml+document.getElementById("details").innerHTML+postHtml;
+     //    let filename = "report";
+
+     //    var blob = new Blob(['\ufeff', html], {
+     //        type: 'application/msword'
+     //    });
+        
+     //    // Specify link url
+     //    var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+        
+     //    // Specify file name
+     //    filename = filename.length ?filename+'.doc':'document.doc';
+        
+     //    // Create download link element
+     //    var downloadLink = document.createElement("a");
+
+     //    document.body.appendChild(downloadLink);
+        
+     //    if(navigator.msSaveOrOpenBlob ){
+     //        navigator.msSaveOrOpenBlob(blob, filename);
+     //    }else{
+     //        // Create a link to the file
+     //        downloadLink.href = url;
+            
+     //        // Setting the file name
+     //        downloadLink.download = filename;
+            
+     //        //triggering the function
+     //        downloadLink.click();
+     //    }
+        
+     //    document.body.removeChild(downloadLink);
+    }
+
 	downloadReceipt(){
 		this.setState({
             hideButton: "hide"
@@ -44,6 +120,16 @@ class Details extends Component{
             this.setState({
                 hideButton: ""
             });
+		});
+	}
+
+	printReceipt(){
+		this.setState({
+			hideButton: "hide"
+		});
+		window.print();
+		this.setState({
+			hideButton: ""
 		});
 	}
 
@@ -96,7 +182,9 @@ class Details extends Component{
 						</tr>
 					</tfoot>
 				</table>
-				<button className={hideButton} type="button" onClick={ () => this.downloadReceipt()}>Download</button>
+				<button className={hideButton + " margin-left-10"} type="button" onClick={ () => this.printReceipt()}>Print</button>
+				<button className={hideButton + " margin-left-10"} type="button" onClick={ () => this.downloadReceipt()}>Download</button>
+				<button className={hideButton} type="button" onClick={ () => this.downloadWord()}>Download on Word</button>
 			</div>
 		)
 	}

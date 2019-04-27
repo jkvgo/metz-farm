@@ -114,6 +114,10 @@
     margin-top: 70px;
 }
 
+.margin-left-10{
+    margin-left: 10px;
+}
+
 // CUSTOM CSS
 
 body{
@@ -842,5 +846,22 @@ table{
                 }
             }
         }
+    }
+}
+
+@media print {
+    html, body{
+        display: block;
+        font-family: 'Courier New';
+        margin: 0;
+    }
+    @page{
+        margin: 0;
+    }
+    #navigation,button{
+        display: none;
+    }
+    #details{
+        padding: 0 40px;
     }
 }
