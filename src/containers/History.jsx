@@ -45,7 +45,7 @@ class History extends Component{
 			let historyMapping = [];
 			res.data.forEach((val, key) => {
 				let row = [];
-				let localDate = new Date(o.created);
+				let localDate = new Date(val.modified);
 				localDate.setHours(localDate.getHours() + 8);
 				row.push(localDate.toLocaleString());
 				itemUnits.forEach((i) => {
