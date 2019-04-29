@@ -29,6 +29,8 @@ class Report extends Component{
         this.downloadReport = this.downloadReport.bind(this);
         this.getCustomers = this.getCustomers.bind(this);
         this.chooseCustomer = this.chooseCustomer.bind(this);
+        this.downloadWord = this.downloadWord.bind(this);
+        this.printReport = this.printReport.bind(this);
         this.getCustomers();
     }
 
@@ -78,6 +80,45 @@ class Report extends Component{
                     hideDownload: ""
                 });
             }
+        });
+    }
+
+    printReport(){
+        this.setState({
+            hideButton: "hide"
+        });
+        window.print();
+        this.setState({
+            hideButton: ""
+        });
+    }
+
+    downloadWord(){
+        this.setState({
+            hideButton: "hide"
+        });
+        var css = (
+         '<style>' +
+         '@page WordSection1{size: 595.35pt 841.95pt;mso-page-orientation: portrait;}' +
+         'div.WordSection1 {page: WordSection1;}' +
+         '</style>'
+       );
+
+       var html = document.getElementById("report").innerHTML;
+       var blob = new Blob(['\ufeff', css + html], {
+         type: 'application/msword'
+       });
+       var url = URL.createObjectURL(blob);
+       var link = document.createElement('A');
+       link.href = url;
+       link.download = 'Report';  // default name without extension 
+       document.body.appendChild(link);
+       if (navigator.msSaveOrOpenBlob ) navigator.msSaveOrOpenBlob( blob, 'Report.doc'); // IE10-11
+           else link.click();  // other browsers
+       document.body.removeChild(link);
+
+       this.setState({
+            hideButton: ""
         });
     }
 
@@ -263,7 +304,9 @@ class Report extends Component{
                         </tr>
                     </tfoot>
             	</table>
+                <button className={hideDownload + " margin-left-10 download-button"} type="button" onClick={ () => this.printReport()}>Print</button>
                 <button type="button" className={"download-button " + hideDownload} onClick={() => this.downloadReport()}>Download</button>
+                <button className={hideDownload + " margin-left-10 download-button"} type="button" onClick={ () => this.downloadWord()}>Download Word</button>
             </div>
         );
     }

@@ -138,6 +138,8 @@ class Details extends Component{
 		const customer = this.state.customer;
 		const hideButton = this.state.hideButton;
 		const orderDate = this.state.date;
+		let localDate = new Date(orderDate);
+		localDate.setHours(localDate.getHours() + 8);
 		let grandTotal = 0;
 		const details = this.state.details.length ? this.state.details.map((det,key) => {
 			grandTotal += det.price;
@@ -157,7 +159,7 @@ class Details extends Component{
 					<h2>Order Number: <b>{orderID}</b></h2>
 					<h2>Customer: <b>{customer}</b></h2>
 					<br/>
-					<h3>Date: <b>{orderDate}</b></h3>
+					<h3>Date: <b>{localDate.toLocaleString()}</b></h3>
 				</div>
 				<table>
 					<thead>

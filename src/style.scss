@@ -862,6 +862,17 @@ table{
         display: none;
     }
     #details{
+        margin-top: 20px;
         padding: 0 40px;
+        h2,h3{
+            margin-bottom: 5px;
+        }
+    }
+    #details table td{
+        padding: 0;
+    }
+
+    #report{
+        padding-right: 10px;
     }
 }
