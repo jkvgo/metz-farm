@@ -156,8 +156,8 @@ class Details extends Component{
 		return(
 			<div id="details">
 				<div className="detail-header">
-					<h2>Order Number: <b>{orderID}</b></h2>
 					<h2>Customer: <b>{customer}</b></h2>
+					<h2>Order Number: <b>{orderID}</b></h2>
 					<br/>
 					<h3>Date: <b>{localDate.toLocaleString()}</b></h3>
 				</div>
