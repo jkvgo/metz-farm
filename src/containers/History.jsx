@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import moment from 'moment';
 import {Route, Link, withRouter} from 'react-router-dom';
 import UserSession from '../UserSession';
 import axios from 'axios';
@@ -45,9 +46,8 @@ class History extends Component{
 			let historyMapping = [];
 			res.data.forEach((val, key) => {
 				let row = [];
-				let localDate = new Date(val.modified);
-				localDate.setHours(localDate.getHours() + 8);
-				row.push(localDate.toLocaleString());
+				let localDate = moment(val.modified).add(8, 'hours').format('MM/DD/YYYY hh:mm A');
+				row.push(localDate);
 				itemUnits.forEach((i) => {
 					i.units.forEach((u) => {
 						if(val.item === i.item && val.unit === u){

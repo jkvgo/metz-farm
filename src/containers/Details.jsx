@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import moment from 'moment';
 import html2canvas from 'html2canvas';
 import UserSession from '../UserSession';
 import jsPDF from 'jspdf';
@@ -62,49 +63,6 @@ class Details extends Component{
 	   this.setState({
 	   		hideButton: ""
 	   });
-
-        // OLD
-
-     //    var css = (
-	    //  	'<style>' +
-	    //  	'@page WordSection1{size: 1pt 1pt;mso-page-orientation: landscape;}' +
-	    //  	'div.WordSection1 {page: WordSection1;}' +
-	    //  	'</style>'
-	   	// );
-     //    var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title>"+css+"</head><body>";
-     //    var postHtml = "</body></html>";
-     //    var html = preHtml+document.getElementById("details").innerHTML+postHtml;
-     //    let filename = "report";
-
-     //    var blob = new Blob(['\ufeff', html], {
-     //        type: 'application/msword'
-     //    });
-        
-     //    // Specify link url
-     //    var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
-        
-     //    // Specify file name
-     //    filename = filename.length ?filename+'.doc':'document.doc';
-        
-     //    // Create download link element
-     //    var downloadLink = document.createElement("a");
-
-     //    document.body.appendChild(downloadLink);
-        
-     //    if(navigator.msSaveOrOpenBlob ){
-     //        navigator.msSaveOrOpenBlob(blob, filename);
-     //    }else{
-     //        // Create a link to the file
-     //        downloadLink.href = url;
-            
-     //        // Setting the file name
-     //        downloadLink.download = filename;
-            
-     //        //triggering the function
-     //        downloadLink.click();
-     //    }
-        
-     //    document.body.removeChild(downloadLink);
     }
 
 	downloadReceipt(){
@@ -138,8 +96,7 @@ class Details extends Component{
 		const customer = this.state.customer;
 		const hideButton = this.state.hideButton;
 		const orderDate = this.state.date;
-		let localDate = new Date(orderDate);
-		localDate.setHours(localDate.getHours() + 8);
+		let localDate = moment(orderDate).add(8, 'hours').format('MM/DD/YYYY hh:mm A');
 		let grandTotal = 0;
 		const details = this.state.details.length ? this.state.details.map((det,key) => {
 			grandTotal += det.price;
@@ -159,7 +116,7 @@ class Details extends Component{
 					<h2>Customer: <b>{customer}</b></h2>
 					<h2>Order Number: <b>{orderID}</b></h2>
 					<br/>
-					<h3>Date: <b>{localDate.toLocaleString()}</b></h3>
+					<h3>Date: <b>{localDate}</b></h3>
 				</div>
 				<table>
 					<thead>

@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import moment from 'moment';
 import {Link} from 'react-router-dom';
 import UserSession from '../UserSession';
 import axios from 'axios';
@@ -76,15 +77,14 @@ class Order extends Component{
 		const orders = this.state.orders.length ? this.state.orders.map((o, key) => {
 			let deleteModeClass = o.id === deleteMode ? "delete" : "default";
 			let cancelled = "";
-			let localDate = new Date(o.created);
-			localDate.setHours(localDate.getHours() + 8);
+			let localDate = moment(o.created).add(8, 'hours').format('MM/DD/YYYY hh:mm A');
 			if(o.deleted === 1) cancelled = "cancelled";
 			return(
 				<tr key={key}>
 					<td>{o.id}</td>
 					<td>{o.customer}</td>
 					<td>{o.username}</td>
-					<td>{localDate.toLocaleString()}</td>
+					<td>{localDate}</td>
 					<td className={deleteModeClass}>
 						<Link to={`${currentPath}/${o.id}`}>View Order Details</Link>
 						<a href="#" className={cancelled} onClick={(e) => this.deleteOrder(e,o.id)}>Cancel</a>
