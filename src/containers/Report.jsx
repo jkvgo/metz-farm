@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import moment from 'moment';
 import UserSession from '../UserSession';
 import DatePicker from 'react-datepicker';
 import html2canvas from 'html2canvas';
@@ -210,11 +211,10 @@ class Report extends Component{
                             hide = "";
                             reportGrandTotal += grandTotal;
                         }
-                        let localDate = new Date(rec.created);
-                        localDate.setHours(localDate.getHours() + 8);
+                        let localDate = moment(rec.created).add(8, 'hours').format('MM/DD/YYYY hh:mm A');
 						return(
 							<tr key={rec.customer+index}>
-                                <td className="td-minimum-width" rowSpan={rec.orders.length} valign="top">{localDate.toLocaleString()}</td>
+                                <td className="td-minimum-width" rowSpan={rec.orders.length} valign="top">{localDate}</td>
 								<td rowSpan={rec.orders.length} valign="top" className="right-text padding-right-30">{rec.receiptID}</td>
 			    				<td rowSpan={rec.orders.length} valign="top">{rec.customer}</td>
 			    				<td>{rec.orders[0].item}</td>
